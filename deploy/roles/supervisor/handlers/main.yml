@@ -7,4 +7,4 @@
   action: service name=supervisord state=restarted
 
 - name: reload supervisor config
-  command: supervisorctl update
+  command: supervisorctl reload

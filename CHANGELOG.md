@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.0.2
+
+* added the option to run only the deployment of new code using ansible and tags
+
 ### 1.0.1
 
 * fixed the bug where the reminder email wouldn't get sent
