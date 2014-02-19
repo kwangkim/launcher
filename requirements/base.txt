@@ -4,6 +4,7 @@ amqp==1.0.12
 anyjson==0.3.3
 billiard==2.7.3.30
 celery==3.0.20
+customerio==0.1.3
 django-celery==3.0.17
 django-extensions==1.1.1
 django-tastypie==0.9.15

@@ -43,6 +43,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     ansible.playbook = "site.yml"
     ansible.inventory_path = "./vagrant"
     ansible.sudo = true
-    ansible.verbose = 'vv'
   end
 end

@@ -12,6 +12,7 @@
     - memcached
     - nginx
     - uwsgi
+    - redis
     - app_deployment
     - newrelic
     - supervisor
