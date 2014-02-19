@@ -51,6 +51,20 @@
   environment: django_env_vars
   tags: code
 
+- name: Load fixtures
+  django_manage: >
+      command=loaddata
+      fixtures={{item}}
+      app_path={{django_project_dir}}
+      settings=launcher.settings.production
+      pythonpath={{django_project_dir}}
+      virtualenv={{venv_dir}}
+  with_items:
+    - admin_user.json
+    - sample_projects.json
+  environment: django_env_vars
+  tags: code
+
 #- name: Run offline compression of the assets
 #  django_manage: >
 #      command=compress
