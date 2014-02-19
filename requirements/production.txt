@@ -1,7 +1,6 @@
 -r base.txt
 
 celery-with-redis==3.0
-django-model-utils==1.4.0
 djrill==0.6.0
 flower==0.5.2
 newrelic==1.13.1.31
