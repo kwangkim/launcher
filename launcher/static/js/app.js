@@ -205,7 +205,7 @@ var EmbedView = Backbone.View.extend({
     generateRestCode: function(size, color, slug) {
         var imgURL = this.generateImgURL(size, color);
         var appURL = this.generateAppURL(slug);
-        return '.. image:: ' + imgURL+ '\n:target: ' + appURL;
+        return '.. image:: ' + imgURL+ '\n   :target: ' + appURL;
     },
 
     generateImgURL: function(size, color) {
