@@ -1,7 +1,7 @@
 from .base import *
 from datetime import timedelta
 
-DEBUG = False
+DEBUG = get_env_variable("DEBUG")
 TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
