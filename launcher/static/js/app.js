@@ -205,15 +205,15 @@ var EmbedView = Backbone.View.extend({
     generateRestCode: function(size, color, slug) {
         var imgURL = this.generateImgURL(size, color);
         var appURL = this.generateAppURL(slug);
-        return '.. image:: ' + imgURL+ '\n:target: ' + appURL;
+        return '.. image:: ' + imgURL+ '\n   :target: ' + appURL;
     },
 
     generateImgURL: function(size, color) {
-        return 'http://launch.appsembler.com/static/img/buttons/btn-' + size + '-' + color + '.png';
+        return 'http://launcher.appsembler.com/static/img/buttons/btn-' + size + '-' + color + '.png';
     },
 
     generateAppURL: function(slug) {
-        return 'http://launch.appsembler.com/' + slug + '/';
+        return 'http://launcher.appsembler.com/' + slug + '/';
     }
 });
 
