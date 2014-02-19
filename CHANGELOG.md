@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.0.3
+
+* deploying using ansible now creates an admin user and some sample projects
+
 ### 1.0.2
 
 * added the option to run only the deployment of new code using ansible and tags
