@@ -7,10 +7,10 @@ TEMPLATE_DEBUG = DEBUG
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'appsemblerlaunch',  # Or path to database file if using sqlite3.
+        'NAME': 'launcher',  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USER': get_env_variable('POSTGRESQL_DB_USERNAME'),
-        'PASSWORD': get_env_variable('POSTGRESQL_DB_PASSWORD'),
+        'USER': get_env_variable('POSTGRES_USER'),
+        'PASSWORD': get_env_variable('POSTGRES_PASSWORD'),
         'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                      # Set to empty string for default.
     }
