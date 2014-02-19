@@ -50,6 +50,7 @@ DATABASES = {
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = [
     '.appsembler.com',
+    '162.243.216.108',
 ]
 
 # Local time zone for this installation. Choices can be found here:
