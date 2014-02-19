@@ -1,0 +1,6 @@
+[server]
+107.170.23.107
+
+[server:vars]
+remote_user=root
+sendfile=on

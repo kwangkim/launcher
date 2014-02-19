@@ -1,0 +1,17 @@
+---
+
+- name: Ensure Python development tools are available
+  apt: pkg={{item}} state=latest
+  with_items:
+    - python-dev
+    - python-setuptools
+    - python-pycurl
+
+- name: Install pip
+  easy_install: name=pip
+
+- name: Update python-setuptools
+  pip: name=setuptools state=latest extra_args='--no-use-wheel'
+
+- name: Install virtualenv.
+  pip: name=virtualenv state=latest

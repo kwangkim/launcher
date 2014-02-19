@@ -1,0 +1,6 @@
+[server]
+192.168.33.10
+
+[server:vars]
+remote_user=vagrant
+sendfile=off

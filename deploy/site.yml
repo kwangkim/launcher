@@ -1,0 +1,17 @@
+---
+# file: site.yml
+- hosts: server
+  remote_user: "{{remote_user}}"
+  gather_facts: false
+  vars_files:
+    - secret_vars.yml
+  roles:
+    - common
+    - pythondev
+    - postgresql
+    - memcached
+    - nginx
+    - uwsgi
+    - app_deployment
+    - newrelic
+    - supervisor

@@ -1,0 +1,482 @@
+[
+{
+  "pk": 1,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Wordpress",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/openshift/wordpress-example",
+    "version": "php-5.3",
+    "default_username": "",
+    "default_password": "",
+    "slug": "wordpress"
+  }
+},
+{
+  "pk": 2,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Drupal",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/openshift/drupal-quickstart.git",
+    "version": "php-5.3, cron",
+    "default_username": "admin",
+    "default_password": "openshift_changeme",
+    "slug": "drupal"
+  }
+},
+{
+  "pk": 4,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Mediawiki",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "git://github.com/openshift/mediawiki-example.git",
+    "version": "php-5.3",
+    "default_username": "admin",
+    "default_password": "OpenShiftAdmin",
+    "slug": "mediawiki"
+  }
+},
+{
+  "pk": 5,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Dokuwiki",
+    "survey_form_url": "",
+    "database": "",
+    "github_url": "git://github.com/openshift/dokuwiki-quickstart.git",
+    "version": "php-5.3",
+    "default_username": "admin",
+    "default_password": "OpenShiftAdmin",
+    "slug": "dokuwiki"
+  }
+},
+{
+  "pk": 6,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Elgg",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "git://github.com/openshift/elgg-openshift-quickstart.git",
+    "version": "php-5.3",
+    "default_username": "",
+    "default_password": "",
+    "slug": "elgg"
+  }
+},
+{
+  "pk": 7,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Codeigniter",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "git://github.com/openshift/CodeIgniterQuickStart.git",
+    "version": "php-5.3",
+    "default_username": "",
+    "default_password": "",
+    "slug": "codeigniter"
+  }
+},
+{
+  "pk": 8,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Piwik",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "git://github.com/openshift/piwik-openshift-quickstart.git",
+    "version": "php-5.3",
+    "default_username": "",
+    "default_password": "",
+    "slug": "piwik"
+  }
+},
+{
+  "pk": 9,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "SQLBuddy",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "git://github.com/openshift/sqlbuddy-openshift-quickstart.git",
+    "version": "php-5.3",
+    "default_username": "",
+    "default_password": "",
+    "slug": "sqlbuddy"
+  }
+},
+{
+  "pk": 10,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "IronMQ",
+    "survey_form_url": "",
+    "database": "",
+    "github_url": "git://github.com/openshift/ironmq-openshift-quickstart.git",
+    "version": "ruby-1.9",
+    "default_username": "",
+    "default_password": "",
+    "slug": "ironmq"
+  }
+},
+{
+  "pk": 12,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "MongoLab",
+    "survey_form_url": "",
+    "database": "",
+    "github_url": "https://github.com/mongolab/mongolab-openshift-quickstart",
+    "version": "nodejs-0.6",
+    "default_username": "",
+    "default_password": "",
+    "slug": "mongolab"
+  }
+},
+{
+  "pk": 13,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "OSQA",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "git://github.com/openshift/OSQA-openshift-quickstart.git",
+    "version": "python-2.6",
+    "default_username": "",
+    "default_password": "",
+    "slug": "osqa"
+  }
+},
+{
+  "pk": 16,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "ownCloud",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "git://github.com/openshift/owncloud-openshift-quickstart.git",
+    "version": "php-5.3",
+    "default_username": "admin",
+    "default_password": "OpenShiftAdmin",
+    "slug": "owncloud"
+  }
+},
+{
+  "pk": 19,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Rails",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "git://github.com/openshift/rails-example.git",
+    "version": "ruby-1.9",
+    "default_username": "",
+    "default_password": "",
+    "slug": "rails"
+  }
+},
+{
+  "pk": 20,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "CapeDwarf",
+    "survey_form_url": "",
+    "database": "",
+    "github_url": "git://github.com/openshift/capedwarf-example.git",
+    "version": "jbossas-7",
+    "default_username": "",
+    "default_password": "",
+    "slug": "capedwarf"
+  }
+},
+{
+  "pk": 21,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Bottle",
+    "survey_form_url": "",
+    "database": "",
+    "github_url": "git://github.com/openshift/bottle-openshift-quickstart.git",
+    "version": "python-2.6",
+    "default_username": "",
+    "default_password": "",
+    "slug": "bottle"
+  }
+},
+{
+  "pk": 22,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Redmine",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/openshift/redmine-2.0-openshift-quickstart",
+    "version": "ruby-1.9",
+    "default_username": "admin",
+    "default_password": "admin",
+    "slug": "redmine"
+  }
+},
+{
+  "pk": 23,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Magento",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "git://github.com/openshift/magento-example.git",
+    "version": "php-5.3",
+    "default_username": "admin",
+    "default_password": "OpenShiftAdmin123",
+    "slug": "magento"
+  }
+},
+{
+  "pk": 24,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "NestaCMS",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/openshift/nestacms-example",
+    "version": "ruby-1.9",
+    "default_username": "",
+    "default_password": "",
+    "slug": "nestacms"
+  }
+},
+{
+  "pk": 26,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Joomla",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/openshift/joomla-example",
+    "version": "php-5.3",
+    "default_username": "admin",
+    "default_password": "4dm1n",
+    "slug": "joomla"
+  }
+},
+{
+  "pk": 27,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Reviewboard",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/openshift/reviewboard-example",
+    "version": "python-2.7",
+    "default_username": "Admin",
+    "default_password": "OpenShiftAdmin",
+    "slug": "reviewboard"
+  }
+},
+{
+  "pk": 28,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "SugarCRM",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/openshift/sugarcrm-example",
+    "version": "php-5.3",
+    "default_username": "admin",
+    "default_password": "admin",
+    "slug": "sugarcrm"
+  }
+},
+{
+  "pk": 29,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Plone",
+    "survey_form_url": "",
+    "database": "",
+    "github_url": "https://github.com/kagesenshi/plone-openshift-quickstart",
+    "version": "python-2.7",
+    "default_username": "admin",
+    "default_password": "OpenShiftAdmin",
+    "slug": "plone"
+  }
+},
+{
+  "pk": 30,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Ohmage",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/stevenolen/ohmage-openshift-quickstart",
+    "version": "jbossews-2.0",
+    "default_username": "ohmage.admin",
+    "default_password": "ohmage.passwd",
+    "slug": "ohmage"
+  }
+},
+{
+  "pk": 31,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "phpBB",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/openshift/phpbb-example",
+    "version": "php-5.3",
+    "default_username": "Admin",
+    "default_password": "OpenShiftAdmin",
+    "slug": "phpbb"
+  }
+},
+{
+  "pk": 32,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Pyramid",
+    "survey_form_url": "",
+    "database": "",
+    "github_url": "https://github.com/kagesenshi/pyramid-buildout-openshift-quickstart",
+    "version": "python-2.7",
+    "default_username": "",
+    "default_password": "",
+    "slug": "pyramid"
+  }
+},
+{
+  "pk": 33,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Active",
+    "name": "Anahita",
+    "survey_form_url": "http://appsembler.wufoo.com/forms/anahita-registration/",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/anahitasocial/anahita-openshift",
+    "version": "php-5.3",
+    "default_username": "admin",
+    "default_password": "j87op$oi89",
+    "slug": "anahita"
+  }
+},
+{
+  "pk": 34,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Inactive",
+    "name": "PyramidMySQL",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/lmacken/pyramid-openshift-quickstart",
+    "version": "python-2.7",
+    "default_username": "",
+    "default_password": "",
+    "slug": "pyramidmysql"
+  }
+},
+{
+  "pk": 35,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Inactive",
+    "name": "Etherpad",
+    "survey_form_url": "",
+    "database": "mongodb-2.2",
+    "github_url": "https://github.com/openshift/etherpad-example",
+    "version": "nodejs-0.6",
+    "default_username": "",
+    "default_password": "",
+    "slug": "etherpad"
+  }
+},
+{
+  "pk": 36,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Inactive",
+    "name": "Mezzanine",
+    "survey_form_url": "",
+    "database": "",
+    "github_url": "https://github.com/natea/mezzanine-openshift",
+    "version": "python-2.6",
+    "default_username": "admin",
+    "default_password": "default",
+    "slug": "mezzanine"
+  }
+},
+{
+  "pk": 37,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Inactive",
+    "name": "Moodle",
+    "survey_form_url": "",
+    "database": "mysql-5.1",
+    "github_url": "https://github.com/burningTyger/openshift_moodle",
+    "version": "php-5.3",
+    "default_username": "",
+    "default_password": "",
+    "slug": "moodle"
+  }
+},
+{
+  "pk": 38,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Inactive",
+    "name": "Red5",
+    "survey_form_url": "",
+    "database": "",
+    "github_url": "https://github.com/dzer6/openshift-red5-quickstart",
+    "version": "diy-0.1",
+    "default_username": "",
+    "default_password": "",
+    "slug": "red5"
+  }
+},
+{
+  "pk": 39,
+  "model": "deployment.project",
+  "fields": {
+    "status": "Inactive",
+    "name": "Trac",
+    "survey_form_url": "",
+    "database": "",
+    "github_url": "https://github.com/brianwcook/openshift-diy-trac",
+    "version": "diy-0.1",
+    "default_username": "",
+    "default_password": "",
+    "slug": "trac"
+  }
+}
+]

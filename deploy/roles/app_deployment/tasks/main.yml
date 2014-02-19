@@ -1,0 +1,41 @@
+---
+
+- name: Clone app repo
+  git: repo=https://github.com/appsembler/mediathread.git dest={{git_repo_dir}} version={{git_repo_branch}}
+
+- name: Clear pip build dir
+  file: path=/opt/venv/build state=absent
+
+- name: Create a virtual env and install app requirements
+  pip: requirements='requirements/local.txt' virtualenv=/opt/venv chdir={{git_repo_dir}}
+
+- name: Install extra python libraries
+  pip: name={{item}} virtualenv=/opt/venv state=latest
+  with_items:
+    - pylibmc
+    - raven
+    - cssmin
+
+- name: Copy the WSGI script
+  template: src=wsgi.py dest={{git_repo_dir}} dest={{django_project_dir}}/wsgi.py
+
+- name: Copy the django settings file
+  template: src=settings_digitalocean.py dest={{django_project_dir}}
+
+- name: Run collectstatic
+  django_manage: >
+      command=collectstatic
+      app_path={{git_repo_dir}}
+      settings=mediathread.settings_digitalocean
+      pythonpath={{git_repo_dir}}
+      virtualenv=/opt/venv
+
+- name: Run offline compression of the assets
+  django_manage: >
+      command=compress
+      app_path={{git_repo_dir}}
+      settings=mediathread.settings_digitalocean
+      pythonpath={{git_repo_dir}}
+      virtualenv=/opt/venv
+  notify:
+    - reload supervisor config

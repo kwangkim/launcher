@@ -1,0 +1,39 @@
+---
+
+- name: Install New Relic python library
+  pip: name=newrelic virtualenv=/opt/venv state=latest
+
+- name: Generate New Relic config
+  command: "{{venv_dir}}/bin/newrelic-admin generate-config {{newrelic_license_key}} newrelic.ini chdir={{django_project_dir}}"
+
+- name: Change the application name
+  ini_file: dest="{{django_project_dir}}/newrelic.ini"
+            section=newrelic
+            option=app_name
+            value="Mediathread"
+
+- name: Add New Relic GPG key
+  apt_key: url=https://download.newrelic.com/548C16BF.gpg state=present
+
+- name: Add New Relic APT repo
+  apt_repository: repo='deb http://apt.newrelic.com/debian/ newrelic non-free' state=present update_cache=yes
+
+- name: Install New Relic server library
+  apt: pkg=newrelic-sysmond state=latest
+
+- name: Set New Relic license key
+  command: nrsysmond-config --set license_key={{newrelic_license_key}}
+  notify:
+    - reload new relic monitoring
+
+- name: Start New Relic monitoring service
+  service: name=newrelic-sysmond state=started enabled=yes
+
+- name: Install plugin package
+  pip: name=newrelic-plugin-agent state=latest
+
+- name: Copy plugin configuration file
+  template: src=newrelic_plugin_agent.cfg dest=/etc/newrelic/newrelic_plugin_agent.cfg
+
+- name: Create log folder
+  file: path=/var/log/newrelic state=directory

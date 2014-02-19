@@ -1,0 +1,10 @@
+-r base.txt
+
+celery-with-redis==3.0
+django-model-utils==1.4.0
+djrill==0.6.0
+flower==0.5.2
+newrelic==1.12.0.56
+psycopg2==2.5.1
+redis==2.7.6
+tornado==3.1
