@@ -10,7 +10,7 @@
   ini_file: dest="{{django_project_dir}}/newrelic.ini"
             section=newrelic
             option=app_name
-            value="Mediathread"
+            value="Launcher"
 
 - name: Add New Relic GPG key
   apt_key: url=https://download.newrelic.com/548C16BF.gpg state=present
