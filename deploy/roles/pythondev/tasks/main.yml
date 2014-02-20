@@ -19,8 +19,14 @@
 - name: Add node.js repo
   apt_repository: repo='ppa:chris-lea/node.js'
 
-- name: Install node.ks
+- name: Install node.js
   apt: name=nodejs state=latest
 
 - name: Install Bower
   npm: name=bower global=yes state=latest
+
+- name: Create celery user
+  user: name=celery comment="Celery user" createhome=no
+
+- name: Create celery folder
+  file: path=/opt/celery owner=celery state=directory
