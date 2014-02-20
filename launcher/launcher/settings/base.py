@@ -47,6 +47,7 @@ DATABASES = {
 ALLOWED_HOSTS = [
     '.appsembler.com',
     '162.243.216.108',
+    '127.0.0.1'
 ]
 
 # Local time zone for this installation. Choices can be found here:
@@ -94,16 +95,20 @@ STATIC_URL = '/static/'
 # Additional locations of static files
 STATICFILES_DIRS = (
     root('static'),
+    root('components/bower_components')
 )
 
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'djangobower.finders.BowerFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'pipeline.finders.FileSystemFinder',
+    'pipeline.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
+    'pipeline.finders.CachedFileFinder',
 )
+
+#STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+STATICFILES_STORAGE = 'pipeline.storage.NonPackagingPipelineStorage'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = get_env_variable('SECRET_KEY')
@@ -147,6 +152,7 @@ INSTALLED_APPS = (
     'djangobower',
     'django_extensions',
     'kombu.transport.django',
+    'pipeline',
     'south',
     'tastypie',
 
@@ -223,6 +229,65 @@ BOWER_INSTALLED_APPS = (
     'bootstrap#2.3.2',
     'bootstrap-modal#2.1.0'
 )
+
+# Django Pipeline config
+
+PIPELINE_CSS = {
+    'launcher_main': {
+        'source_filenames': (
+            'bootstrap/docs/assets/css/bootstrap.css',
+            'bootstrap/docs/assets/css/bootstrap-responsive.css',
+            'css/app.css'
+        ),
+        'output_filename': 'css/launcher_main.css',
+        'extra_context': {
+            'media': 'screen',
+        },
+    },
+    'bootstrap_modal': {
+        'source_filenames': (
+            'bootstrap-modal/css/bootstrap-modal.css',
+        ),
+        'output_filename': 'css/modal.css',
+        'extra_context': {
+            'media': 'screen',
+        },
+    },
+}
+
+PIPELINE_JS = {
+    'launcher_main': {
+        'source_filenames': (
+            'jquery/jquery.js',
+            'bootstrap/docs/assets/js/bootstrap.js',
+            'json2/json2.js',
+            'underscore/underscore.js',
+            'backbone/backbone.js',
+        ),
+        'output_filename': 'js/launcher_main.min.js',
+    },
+    'app': {
+        'source_filenames': (
+            'js/app.js',
+        ),
+        'output_filename': 'js/app.min.js'
+
+    },
+    'countdown': {
+        'source_filenames': (
+            'kbwood_countdown/jquery.countdown.js',
+        ),
+        'output_filename': 'js/countdown.min.js'
+
+    },
+    'bootstrap_modal': {
+        'source_filenames': (
+            'bootstrap-modal/js/bootstrap-modalmanager.js',
+            'bootstrap-modal/js/bootstrap-modal.js',
+        ),
+        'output_filename': 'js/modal.min.js'
+    },
+}
 
 # Celery config
 BROKER_URL = 'django://'

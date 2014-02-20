@@ -1,14 +1,14 @@
 {% extends "deployment/deployer_base.html" %}
+{% load compressed %}
 {% load static from staticfiles %}
 
 {% block extra_css %}
-<link href="{% static "bootstrap-modal/css/bootstrap-modal.css" %}" rel="stylesheet" media="screen">
+{% compressed_css 'bootstrap_modal' %}
 {% endblock extra_css %}
 
 {% block extra_js %}
   {{ block.super}}
-  <script src="{% static "bootstrap-modal/js/bootstrap-modalmanager.js" %}"></script>
-  <script src="{% static "bootstrap-modal/js/bootstrap-modal.js" %}"></script>
+  {% compressed_js 'bootstrap_modal' %}
 {% endblock extra_js %}
 
 
