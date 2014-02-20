@@ -169,3 +169,6 @@ pip-log.txt
 launcher.db
 .idea
 secret_vars.yml
+collected_static/
+components/
+celerybeat-schedule

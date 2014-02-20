@@ -105,6 +105,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'djangobower.finders.BowerFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -147,6 +148,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Third-party apps
+    'djangobower',
     'django_extensions',
     'djcelery',
     'kombu.transport.django',
@@ -209,6 +211,17 @@ LOGGING = {
     },
 }
 
+# Bower config
+BOWER_COMPONENTS_ROOT = root('components')
+
+BOWER_INSTALLED_APPS = (
+    'jquery#1.9.1',
+    'underscore#1.6.0',
+    'backbone#1.1.1',
+    'json2',
+    'kbwood_countdown#2.0.0',
+    'bootstrap#2.3.2',
+)
 
 # Celery config
 BROKER_URL = 'django://'
