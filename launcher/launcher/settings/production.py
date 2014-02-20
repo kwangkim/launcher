@@ -1,7 +1,8 @@
 from .base import *
 from datetime import timedelta
 
-DEBUG = get_env_variable("DEBUG")
+# needed to convert string values to boolean
+DEBUG = (get_env_variable("DEBUG") == "True")
 TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {

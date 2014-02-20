@@ -1,3 +1,4 @@
+{% load compressed %}
 {% load static from staticfiles %}
 <!DOCTYPE html>
 <html>
@@ -5,23 +6,17 @@
     <title>Appsembler Launcher</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
-    <link href="{% static "bootstrap/docs/assets/css/bootstrap.css" %}" rel="stylesheet" media="screen">
-    <link href="{% static "bootstrap/docs/assets/css/bootstrap-responsive.css" %}" rel="stylesheet" media="screen">
-    <link href="{% static "css/app.css" %}" rel="stylesheet" media="screen">
+    {% compressed_css 'launcher_main' %}
     {% block extra_css %}{% endblock extra_css %}
+    {% compressed_js 'launcher_main' %}
+
   </head>
   <body>
     <div class="container">
       {% block content %}{% endblock %}
     </div> <!-- /container -->
 
-    <script src="{% static "jquery/jquery.min.js" %}"></script>
-    <script src="{% static "bootstrap/docs/assets/js/bootstrap.min.js" %}"></script>
-    <script src="{% static "json2/json2.js" %}"></script>
-    <script src="{% static "underscore/underscore.js" %}"></script>
-    <script src="{% static "backbone/backbone.js" %}"></script>
-    {% block extra_js %}
-    {% endblock extra_js %}
+
     {% block js_templates %}
     {% endblock js_templates %}
     
@@ -34,5 +29,7 @@
         {% endif %}
         window.analytics.page();
      </script>
+    {% block extra_js %}
+    {% endblock extra_js %}
   </body>
 </html>
