@@ -21,9 +21,9 @@ $(function(){
 <div id="central-widget">
     <div class="form-deploy">
     {% if object.status == 'Completed' %}
-      <h3>{{ object.project.name }} deploy completed</h3>
+      <h2>{{ object.project.name }} deploy completed</h2>
       <div class="alert alert-success" id="info-message-section">
-        <i class="icon-wrench"></i><span id="info-message">Successfully deployed!</span>
+        <span class="glyphicon glyphicon-wrench"></span><span id="info-message"> Successfully deployed!</span>
       </div>
       {% if username or password %}
       <div class="alert alert-info auth-details">
@@ -36,19 +36,19 @@ $(function(){
       <p><strong id="minutes">{{ remaining }}</strong> remaining to evaluate {{ object.project.name }}</p>
       {% if remaining > 0 %}
       <div class="progress progress-striped active remaining-progress">
-        <div class="bar" style="width: {{ percentage }}%;"></div>
+        <div class="progress-bar" style="width: {{ percentage }}%;"></div>
       </div>
       {% endif %}
     {% elif object.status == 'Failed' %}
       <h3>{{ object.project.name }} deploy failed</h3>
       <div class="alert alert-error" id="info-message-section">
-        <i class="icon-remove"></i><span id="info-message">There's been an error during deployment</span>
+        <span class="glyphicon glyphicon-remove"></span><span id="info-message"> There's been an error during deployment</span>
       </div>
       <p class="error_message">{{ object.project.name }} couldn't be deployed</p>
     {% elif object.status == 'Expired' %}
         <h3>{{ object.project.name }} expired!</h3>
         <div class="alert" id="info-message-section">
-            <i class="icon-time"></i><span id="info-message"> Your timed trial of the application has expired.</span>
+            <span class="glyphicon glyphicon-time"></span><span id="info-message"> Your timed trial of the application has expired.</span>
         </div>
     {% endif %}
     </div>

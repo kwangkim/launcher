@@ -3,12 +3,10 @@
 {% load static from staticfiles %}
 
 {% block extra_css %}
-{% compressed_css 'bootstrap_modal' %}
 {% endblock extra_css %}
 
 {% block extra_js %}
   {{ block.super}}
-  {% compressed_js 'bootstrap_modal' %}
 {% endblock extra_js %}
 
 

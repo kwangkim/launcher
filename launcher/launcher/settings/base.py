@@ -226,7 +226,7 @@ BOWER_INSTALLED_APPS = (
     'backbone#1.1.1',
     'json2',
     'kbwood_countdown#1.6.2',
-    'bootstrap#2.3.2',
+    'bootstrap#3.1.1',
     'bootstrap-modal#2.1.0'
 )
 
@@ -235,8 +235,8 @@ BOWER_INSTALLED_APPS = (
 PIPELINE_CSS = {
     'launcher_main': {
         'source_filenames': (
-            'bootstrap/less/bootstrap.less',
-            'bootstrap/less/responsive.less',
+            'bootstrap/dist/css/bootstrap.css',
+            'bootstrap/dist/css/bootstrap-theme.css',
             'css/app.css'
         ),
         'output_filename': 'css/launcher_main.css',
@@ -259,7 +259,7 @@ PIPELINE_JS = {
     'launcher_main': {
         'source_filenames': (
             'jquery/jquery.js',
-            'bootstrap/docs/assets/js/bootstrap.js',
+            'bootstrap/dist/js/bootstrap.js',
             'json2/json2.js',
             'underscore/underscore.js',
             'backbone/backbone.js',
