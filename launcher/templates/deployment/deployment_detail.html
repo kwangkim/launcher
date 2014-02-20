@@ -5,13 +5,15 @@
 {% block extra_js %}
 {% compressed_js 'countdown' %}
 <script>
-  $("#minutes").countdown({until: '+{{remaining}}s', onTick: updateProgressbar, tickInterval: 10,
-   layout: '{mn} {ml} and {sn} {sl}'});
-  
-  function updateProgressbar(periods) {
-    var percentage = (periods[5] / 60) * 100;
-    $('.bar').width(percentage + '%');
-  }
+$(function(){
+    $("#minutes").countdown({until: '+{{remaining}}s', onTick: updateProgressbar, tickInterval: 10,
+    layout: '{mn} {ml} and {sn} {sl}'});
+
+    function updateProgressbar(periods) {
+        var percentage = (periods[5] / 60) * 100;
+        $('.bar').width(percentage + '%');
+    }
+})
 </script>
 {% endblock extra_js %}
 

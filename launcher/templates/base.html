@@ -7,10 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     {% compressed_css 'launcher_main' %}
-    {% compressed_js 'launcher_main' %}
     {% block extra_css %}{% endblock extra_css %}
-    {% block extra_js %}
-    {% endblock extra_js %}
+    {% compressed_js 'launcher_main' %}
+
   </head>
   <body>
     <div class="container">
@@ -30,6 +29,7 @@
         {% endif %}
         window.analytics.page();
      </script>
-
+    {% block extra_js %}
+    {% endblock extra_js %}
   </body>
 </html>

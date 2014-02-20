@@ -28,6 +28,9 @@
 - name: Install Yuglify
   npm: name=yuglify global=yes state=latest
 
+- name: Install Less compiler
+  npm: name=less global=yes state=latest
+
 - name: Create celery user
   user: name=celery comment="Celery user" createhome=no
 

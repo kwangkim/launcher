@@ -95,7 +95,7 @@ STATIC_URL = '/static/'
 # Additional locations of static files
 STATICFILES_DIRS = (
     root('static'),
-    root('components/bower_components')
+    root('components/bower_components'),
 )
 
 # List of finder classes that know how to find static files in
@@ -107,8 +107,7 @@ STATICFILES_FINDERS = (
     'pipeline.finders.CachedFileFinder',
 )
 
-#STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
-STATICFILES_STORAGE = 'pipeline.storage.NonPackagingPipelineStorage'
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = get_env_variable('SECRET_KEY')
@@ -235,8 +234,8 @@ BOWER_INSTALLED_APPS = (
 PIPELINE_CSS = {
     'launcher_main': {
         'source_filenames': (
-            'bootstrap/docs/assets/css/bootstrap.css',
-            'bootstrap/docs/assets/css/bootstrap-responsive.css',
+            'bootstrap/less/bootstrap.less',
+            'bootstrap/less/responsive.less',
             'css/app.css'
         ),
         'output_filename': 'css/launcher_main.css',
@@ -275,7 +274,7 @@ PIPELINE_JS = {
     },
     'countdown': {
         'source_filenames': (
-            'kbwood_countdown/jquery.countdown.js',
+            'js/jquery.countdown.min.js',
         ),
         'output_filename': 'js/countdown.min.js'
 
@@ -288,6 +287,10 @@ PIPELINE_JS = {
         'output_filename': 'js/modal.min.js'
     },
 }
+
+PIPELINE_COMPILERS = (
+  'pipeline.compilers.less.LessCompiler',
+)
 
 # Celery config
 BROKER_URL = 'django://'
