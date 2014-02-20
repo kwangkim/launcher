@@ -1,20 +1,30 @@
-import logging
+import os
 import requests
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
-from celery import task
+from celery import Celery
 from celery.utils.log import get_task_logger
+
+# set the default Django settings module for the 'celery' program.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'launcher.settings.production')
+
+app = Celery('launcher')
+
+# Using a string here means the worker will not have to
+# pickle the object when using Windows.
+app.config_from_object('django.conf:settings')
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 logger = get_task_logger(__name__)
 
 
-@task()
+@app.task
 def deploy(deploy_instance):
     deploy_instance.deploy()
 
 
-@task()
+@app.task
 def destroy_expired_apps():
     # protection against circular imports
     from .models import Deployment
@@ -42,7 +52,7 @@ def destroy_expired_apps():
             )
 
 
-@task()
+@app.task
 def app_expiring_soon_reminder():
     # protection against circular imports
     from .models import Deployment
