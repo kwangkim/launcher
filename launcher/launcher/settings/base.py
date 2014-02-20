@@ -221,6 +221,7 @@ BOWER_INSTALLED_APPS = (
     'json2',
     'kbwood_countdown#2.0.0',
     'bootstrap#2.3.2',
+    'bootstrap-modal#2.1.0'
 )
 
 # Celery config

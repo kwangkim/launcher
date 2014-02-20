@@ -2,7 +2,7 @@
 {% load static from staticfiles %}
 
 {% block extra_js %}
-<script src="{% static "js/jquery.countdown.min.js" %}"></script>
+<script src="{% static "kbwood_countdownjs/jquery.countdown.min.js" %}"></script>
 <script>
   $("#minutes").countdown({until: '+{{remaining}}s', onTick: updateProgressbar, tickInterval: 10,
    layout: '{mn} {ml} and {sn} {sl}'});
