@@ -47,7 +47,8 @@ DATABASES = {
 ALLOWED_HOSTS = [
     '.appsembler.com',
     '162.243.216.108',
-    '127.0.0.1'
+    '127.0.0.1',
+    '192.168.33.10',
 ]
 
 # Local time zone for this installation. Choices can be found here:
