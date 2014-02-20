@@ -219,7 +219,7 @@ BOWER_INSTALLED_APPS = (
     'underscore#1.6.0',
     'backbone#1.1.1',
     'json2',
-    'kbwood_countdown#2.0.0',
+    'kbwood_countdown#1.6.2',
     'bootstrap#2.3.2',
     'bootstrap-modal#2.1.0'
 )
