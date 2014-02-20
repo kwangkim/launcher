@@ -68,6 +68,11 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': False,
         },
+        'deployment.tasks': {
+            'level': 'INFO',
+            'handlers': ['console'],
+            'propagate': False,
+        },
     },
 }
 

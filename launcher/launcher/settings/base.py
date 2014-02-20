@@ -203,6 +203,11 @@ LOGGING = {
             'handlers': ['sentry'],
             'propagate': False,
         },
+        'deployment.tasks': {
+            'level': 'INFO',
+            'handlers': ['console'],
+            'propagate': False,
+        },
     },
 }
 

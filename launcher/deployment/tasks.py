@@ -21,6 +21,7 @@ logger = get_task_logger(__name__)
 
 @app.task
 def deploy(deploy_instance):
+    logger.info("Deploying {0.project.name}: {0.deploy_id} for {0.email}".format(deploy_instance))
     deploy_instance.deploy()
 
 
