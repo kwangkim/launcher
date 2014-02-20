@@ -14,6 +14,10 @@
     - libxslt1-dev
     - htop
     - iotop
+    - python-software-properties
+    - python
+    - g++
+    - make
 
 - name: Generate locales
   command: locale-gen hr_HR.UTF-8

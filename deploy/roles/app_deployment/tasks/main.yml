@@ -21,6 +21,16 @@
     - raven
     - cssmin
 
+- name: Install bower components
+  django_manage: >
+      command="bower_install -- --allow-root"
+      app_path={{django_project_dir}}
+      settings=launcher.settings.production
+      pythonpath={{django_project_dir}}
+      virtualenv={{venv_dir}}
+  environment: django_env_vars
+  tags: code
+
 - name: Run collectstatic
   django_manage: >
       command=collectstatic
