@@ -11,10 +11,6 @@ def get_env_variable(var_name):
         error_msg = "Set the %s environment variable" % var_name
         raise ImproperlyConfigured(error_msg)
 
-
-import djcelery
-djcelery.setup_loader()
-
 # utility functions for handling paths inside the project
 here = lambda *x: join(abspath(dirname(__file__)), *x)
 PROJECT_ROOT = here("..", "..")
@@ -150,7 +146,6 @@ INSTALLED_APPS = (
     # Third-party apps
     'djangobower',
     'django_extensions',
-    'djcelery',
     'kombu.transport.django',
     'south',
     'tastypie',
