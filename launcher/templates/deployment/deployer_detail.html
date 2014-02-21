@@ -2,14 +2,6 @@
 {% load compressed %}
 {% load static from staticfiles %}
 
-{% block extra_css %}
-{% endblock extra_css %}
-
-{% block extra_js %}
-  {{ block.super}}
-{% endblock extra_js %}
-
-
 {% block deployer_form %}
 {% verbatim %}
 <h3 class="form-deploy-heading">Get your own <%= project.attributes.name %> site in minutes!</h3>

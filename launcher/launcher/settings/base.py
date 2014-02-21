@@ -227,7 +227,6 @@ BOWER_INSTALLED_APPS = (
     'json2',
     'kbwood_countdown#1.6.2',
     'bootstrap#3.1.1',
-    'bootstrap-modal#2.1.0'
 )
 
 # Django Pipeline config
@@ -240,15 +239,6 @@ PIPELINE_CSS = {
             'css/app.css'
         ),
         'output_filename': 'css/launcher_main.css',
-        'extra_context': {
-            'media': 'screen',
-        },
-    },
-    'bootstrap_modal': {
-        'source_filenames': (
-            'bootstrap-modal/css/bootstrap-modal.css',
-        ),
-        'output_filename': 'css/modal.css',
         'extra_context': {
             'media': 'screen',
         },
@@ -279,13 +269,6 @@ PIPELINE_JS = {
         ),
         'output_filename': 'js/countdown.min.js'
 
-    },
-    'bootstrap_modal': {
-        'source_filenames': (
-            'bootstrap-modal/js/bootstrap-modalmanager.js',
-            'bootstrap-modal/js/bootstrap-modal.js',
-        ),
-        'output_filename': 'js/modal.min.js'
     },
 }
 
