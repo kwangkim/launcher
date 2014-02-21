@@ -259,10 +259,10 @@ PIPELINE_JS = {
     'launcher_main': {
         'source_filenames': (
             'jquery/jquery.js',
-            'bootstrap/dist/js/bootstrap.js',
             'json2/json2.js',
             'underscore/underscore.js',
             'backbone/backbone.js',
+            'bootstrap/dist/js/bootstrap.js',
         ),
         'output_filename': 'js/launcher_main.min.js',
     },
@@ -290,8 +290,12 @@ PIPELINE_JS = {
 }
 
 PIPELINE_COMPILERS = (
-  'pipeline.compilers.less.LessCompiler',
+    'pipeline.compilers.less.LessCompiler',
 )
+
+# npm install -g uglify-js
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.uglifyjs.UglifyJSCompressor'
+PIPELINE_UGLIFYJS_BINARY = '/usr/bin/env uglifyjs'
 
 # Celery config
 BROKER_URL = 'django://'

@@ -22,14 +22,13 @@
 - name: Install node.js
   apt: name=nodejs state=latest
 
-- name: Install Bower
-  npm: name=bower global=yes state=latest
-
-- name: Install Yuglify
-  npm: name=yuglify global=yes state=latest
-
-- name: Install Less compiler
-  npm: name=less global=yes state=latest
+- name: Install required npm packages
+  npm: name={{item}} global=yes state=latest
+  with_items:
+    - bower
+    - yuglify
+    - uglify-js
+    - less
 
 - name: Create celery user
   user: name=celery comment="Celery user" createhome=no
