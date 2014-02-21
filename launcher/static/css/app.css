@@ -21,6 +21,7 @@ body {
 .form-deploy .form-deploy-heading {
   margin-bottom: 10px;
   text-align: center;
+  font-weight: bold;
 }
 
 .form-deploy #project_select {
@@ -37,10 +38,10 @@ body {
 }
 
 .app-url {
-  font-size: 12px;
+  font-size: 13px;
 }
 
-.remaining-progress .bar {
+.remaining-progress .progress-bar {
   background-color: #EE7A70;
 }
 
