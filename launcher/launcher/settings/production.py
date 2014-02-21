@@ -28,6 +28,13 @@ RAVEN_CONFIG = {
     'timeout': 3,
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
+
 # Email settings
 EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
 MANDRILL_API_KEY = get_env_variable('MANDRILL_API_KEY')
