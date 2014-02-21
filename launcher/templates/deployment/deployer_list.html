@@ -2,7 +2,7 @@
 
 {% block deployer_form %}
 <h3 class="form-deploy-heading">Pick a project:</h3>
-<select name="project" id="project_select">
+<select name="project" id="project_select" class="form-control">
 {% verbatim %}
 <% _.each(projects, function(project) { %>
     <option value="<%= project.resource_uri %>"><%= project.name %></option>

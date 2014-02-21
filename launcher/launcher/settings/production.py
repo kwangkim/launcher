@@ -1,7 +1,8 @@
 from .base import *
 from datetime import timedelta
 
-DEBUG = get_env_variable("DEBUG")
+# needed to convert string values to boolean
+DEBUG = (get_env_variable("DEBUG") == "True")
 TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
@@ -25,6 +26,13 @@ INSTALLED_APPS += (
 RAVEN_CONFIG = {
     'dsn': get_env_variable('SENTRY_DSN'),
     'timeout': 3,
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
 }
 
 # Email settings

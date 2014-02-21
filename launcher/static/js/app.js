@@ -133,7 +133,8 @@ var AppView = Backbone.View.extend({
 
     updateInfoStatus: function(data) {
         $("#info-message").text(data.message);
-        $(".bar").width(data.percent + "%");
+        $('.progress-bar').width(data.percent + "%");
+        $('.progress-bar').attr("aria-valuenow", data.percent);
     },
 
     deploymentSuccess: function(data) {
@@ -143,7 +144,7 @@ var AppView = Backbone.View.extend({
         var $info = $("#info-message-section");
         $(".form-deploy h3").text("Deployed " + data['app_name']);
         $info.removeClass('alert-info').addClass('alert-success');
-        $info.html('<i class="icon-ok"></i>' + data['message']);
+        $info.html('<span class="glyphicon glyphicon-ok"></span> ' + data['message']);
         var app_link = '<a class="app-url" href="' + data['app_url'] + '">' + data['app_url'] + '</a>';
         $(app_link).insertAfter($info);
         if(data['username'] || data['password']) {
@@ -160,7 +161,7 @@ var AppView = Backbone.View.extend({
         $("img.spinner").hide();
         var $info = $("#info-message-section");
         $info.removeClass('alert-info').addClass('alert-error');
-        $info.html('<i class="icon-remove"></i>' + data['message']);
+        $info.html('<span class="glyphicon glyphicon-remove"></span> ' + data['message']);
     }
 });
 

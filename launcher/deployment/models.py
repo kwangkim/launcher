@@ -67,7 +67,7 @@ class Deployment(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES,
                               default='Deploying')
-    reminder_mail_sent = models.BooleanField()
+    reminder_mail_sent = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.deploy_id

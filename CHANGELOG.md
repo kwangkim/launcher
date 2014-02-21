@@ -1,5 +1,13 @@
 # Changelog
 
+### 1.1
+
+* now using Bower for managing frontend packages
+* updated Django to 1.6.2 and python packages to newest versions
+* enabled django pipeline for compressing the asset files
+* added far future expires for compressed assets
+* updated Bootstrap to 3.1.1
+
 ### 1.0.3
 
 * deploying using ansible now creates an admin user and some sample projects

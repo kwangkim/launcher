@@ -11,10 +11,6 @@ def get_env_variable(var_name):
         error_msg = "Set the %s environment variable" % var_name
         raise ImproperlyConfigured(error_msg)
 
-
-import djcelery
-djcelery.setup_loader()
-
 # utility functions for handling paths inside the project
 here = lambda *x: join(abspath(dirname(__file__)), *x)
 PROJECT_ROOT = here("..", "..")
@@ -51,6 +47,8 @@ DATABASES = {
 ALLOWED_HOSTS = [
     '.appsembler.com',
     '162.243.216.108',
+    '127.0.0.1',
+    '192.168.33.10',
 ]
 
 # Local time zone for this installation. Choices can be found here:
@@ -98,15 +96,19 @@ STATIC_URL = '/static/'
 # Additional locations of static files
 STATICFILES_DIRS = (
     root('static'),
+    root('components/bower_components'),
 )
 
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'pipeline.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'pipeline.finders.PipelineFinder',
+    'pipeline.finders.CachedFileFinder',
 )
+
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = get_env_variable('SECRET_KEY')
@@ -147,9 +149,10 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Third-party apps
+    'djangobower',
     'django_extensions',
-    'djcelery',
     'kombu.transport.django',
+    'pipeline',
     'south',
     'tastypie',
 
@@ -206,9 +209,76 @@ LOGGING = {
             'handlers': ['sentry'],
             'propagate': False,
         },
+        'deployment.tasks': {
+            'level': 'INFO',
+            'handlers': ['console'],
+            'propagate': False,
+        },
     },
 }
 
+# Bower config
+BOWER_COMPONENTS_ROOT = root('components')
+
+BOWER_INSTALLED_APPS = (
+    'jquery#1.9.1',
+    'underscore#1.6.0',
+    'backbone#1.1.1',
+    'json2',
+    'kbwood_countdown#1.6.2',
+    'bootstrap#3.1.1',
+)
+
+# Django Pipeline config
+
+PIPELINE_CSS = {
+    'launcher_main': {
+        'source_filenames': (
+            'bootstrap/dist/css/bootstrap.css',
+            'bootstrap/dist/css/bootstrap-theme.css',
+            'css/app.css'
+        ),
+        'output_filename': 'css/launcher_main.css',
+        'extra_context': {
+            'media': 'screen',
+        },
+    },
+}
+
+PIPELINE_JS = {
+    'launcher_main': {
+        'source_filenames': (
+            'jquery/jquery.js',
+            'json2/json2.js',
+            'underscore/underscore.js',
+            'backbone/backbone.js',
+            'bootstrap/dist/js/bootstrap.js',
+        ),
+        'output_filename': 'js/launcher_main.min.js',
+    },
+    'app': {
+        'source_filenames': (
+            'js/app.js',
+        ),
+        'output_filename': 'js/app.min.js'
+
+    },
+    'countdown': {
+        'source_filenames': (
+            'js/jquery.countdown.min.js',
+        ),
+        'output_filename': 'js/countdown.min.js'
+
+    },
+}
+
+PIPELINE_COMPILERS = (
+    'pipeline.compilers.less.LessCompiler',
+)
+
+# npm install -g uglify-js
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.uglifyjs.UglifyJSCompressor'
+PIPELINE_UGLIFYJS_BINARY = '/usr/bin/env uglifyjs'
 
 # Celery config
 BROKER_URL = 'django://'
