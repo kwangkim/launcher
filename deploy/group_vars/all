@@ -7,7 +7,7 @@ server_name:
 venv_dir: /opt/venv
 
 # memcached config
-memcached_memory: 32
+memcached_memory: 16
 
 # django static files
 cloudfront_url: "d1s9voh9zis26j.cloudfront.net" # without the http(s) part and the trailing slash
