@@ -14,16 +14,9 @@
   pip: requirements='requirements/production.txt' virtualenv=/opt/venv chdir={{git_repo_dir}}
   tags: code
 
-- name: Install extra python libraries
-  pip: name={{item}} virtualenv=/opt/venv state=latest
-  with_items:
-    - pylibmc
-    - raven
-    - cssmin
-
 - name: Install bower components
   django_manage: >
-      command="bower_install -- --allow-root"
+      command="bower_install -- --allow-root -f"
       app_path={{django_project_dir}}
       settings=launcher.settings.production
       pythonpath={{django_project_dir}}
@@ -74,13 +67,3 @@
     - sample_projects.json
   environment: django_env_vars
   tags: code
-
-#- name: Run offline compression of the assets
-#  django_manage: >
-#      command=compress
-#      app_path={{git_repo_dir}}
-#      settings=launcher.settings.production
-#      pythonpath={{git_repo_dir}}
-#      virtualenv=/opt/venv
-#  notify:
-#    - reload supervisor config
