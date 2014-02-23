@@ -21,8 +21,8 @@ You also need working [Pusher](http://pusher.com/), [Customer.io](http://custome
 
 		# Shipyard settings
 		export SHIPYARD_HOST=''
-                export SHIPYARD_USER=''
-                export SHIPYARD_KEY=''
+		export SHIPYARD_USER=''
+		export SHIPYARD_KEY=''
 
 		# Customer.io settings
 		export CUSTOMERIO_SITE_ID=''
