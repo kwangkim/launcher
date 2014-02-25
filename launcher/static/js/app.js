@@ -184,28 +184,24 @@ var EmbedView = Backbone.View.extend({
         var size = $btn.data('size');
         var color = $btn.data('color');
         var slug = $btn.data('slug');
-        this.markdownTxt.text(this.generateMarkdownCode(size, color, slug));
-        this.htmlTxt.text(this.generateHTMLCode(size, color, slug));
-        this.restTxt.text(this.generateRestCode(size, color, slug));
-        this.imageTxt.text(this.generateImgURL(size, color));
+        var imgURL = this.generateImgURL(size, color);
+        var appURL = this.generateAppURL(slug);
+        this.markdownTxt.text(this.generateMarkdownCode(imgURL, appURL));
+        this.htmlTxt.text(this.generateHTMLCode(imgURL, appURL));
+        this.restTxt.text(this.generateRestCode(imgURL, appURL));
+        this.imageTxt.text(imgURL);
         return false;
     },
 
-    generateMarkdownCode: function(size, color, slug) {
-        var imgURL = this.generateImgURL(size, color);
-        var appURL = this.generateAppURL(slug);
+    generateMarkdownCode: function(imgURL, appURL) {
         return "[![Launch demo site]("+ imgURL + ")](" + appURL + ")";
     },
 
-    generateHTMLCode: function(size, color, slug) {
-        var imgURL = this.generateImgURL(size, color);
-        var appURL = this.generateAppURL(slug);
+    generateHTMLCode: function(imgURL, appURL) {
         return '<a href="' + appURL + '"><img src="' + imgURL + '"></a>';
     },
 
-    generateRestCode: function(size, color, slug) {
-        var imgURL = this.generateImgURL(size, color);
-        var appURL = this.generateAppURL(slug);
+    generateRestCode: function(imgURL, appURL) {
         return '.. image:: ' + imgURL+ '\n   :target: ' + appURL;
     },
 
