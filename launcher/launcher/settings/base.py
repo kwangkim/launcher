@@ -223,7 +223,7 @@ BOWER_COMPONENTS_ROOT = root('components')
 BOWER_INSTALLED_APPS = (
     'jquery#1.9.1',
     'underscore#1.6.0',
-    'backbone#1.1.1',
+    'backbone#1.1.2',
     'json2',
     'kbwood_countdown#1.6.2',
     'bootstrap#3.1.1',

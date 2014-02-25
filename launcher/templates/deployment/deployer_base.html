@@ -13,23 +13,23 @@
 
 {% block js_templates %}
     <!-- Templates -->
-    <script type="text/template" id="project_form_template">
+    <script type="text/template" id="deploy_form_template">
       {% block extra_deployer_content %}{% endblock extra_deployer_content %}
       <div id="central-widget">
-      <form class="form-deploy" method="post">
-        {% block deployer_form %}
-        {% endblock deployer_form %}
-        <h4>Where can we send the URL?</h4>
-        <div class="form-group">
-            <div class="input-group">
-              <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
-              <input type="text" name="email" class="form-control" value="" id="email_input" placeholder="name@domain.com">
+          <form class="form-deploy" method="post">
+            {% block deployer_form %}
+            {% endblock deployer_form %}
+            <h4>Where can we send the URL?</h4>
+            <div class="form-group">
+                <div class="input-group">
+                  <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
+                  <input type="text" name="email" class="form-control" value="" id="email_input" placeholder="name@domain.com">
+                </div>
+                <span class="help-block"></span>
             </div>
-            <span class="help-block"></span>
-        </div>
-        <button class="btn btn-success" type="submit">Launch demo site</button>
-      </form>
-      {% block form_extra_text %}{% endblock form_extra_text %}
+            <button class="btn btn-success" type="submit">Launch demo site</button>
+          </form>
+          {% block form_extra_text %}{% endblock form_extra_text %}
       </div> 
     </script>
 
