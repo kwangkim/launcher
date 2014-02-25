@@ -1,25 +1,23 @@
-function validateEmail(email)
-{
-    var re = /\S+@\S+\.\S+/;
-    return re.test(email);
-}
 
-var API_ROOT = '/api/v1/';
-var pusher = new Pusher('cea6dff5fc1f38a2d45d');
+
+var App = App || {};
+
+App.API_ROOT = '/api/v1/';
+App.pusher = new Pusher('cea6dff5fc1f38a2d45d');
 
 // Models
-var Project = Backbone.Model.extend({});
+App.Project = Backbone.Model.extend({});
 
-var ProjectList = Backbone.Collection.extend({
-    model: Project,
-    url: API_ROOT + 'projects/',
+App.ProjectList = Backbone.Collection.extend({
+    model: App.Project,
+    url: App.API_ROOT + 'projects/',
     parse: function(response) {
         return response.objects;
     }
 });
 
-var Deployment = Backbone.Model.extend({
-    url: API_ROOT + 'deployments/',
+App.Deployment = Backbone.Model.extend({
+    url: App.API_ROOT + 'deployments/',
     validate: function(attrs, options) {
         var re = /\S+@\S+\.\S+/;
         if(attrs.email === "" || !re.test(attrs.email)) {
@@ -32,7 +30,7 @@ var Deployment = Backbone.Model.extend({
 });
 
 // Views
-var AppView = Backbone.View.extend({
+App.AppView = Backbone.View.extend({
     el: $('.container'),
 
     events: {
@@ -40,7 +38,7 @@ var AppView = Backbone.View.extend({
     },
 
     initialize: function() {
-        this.projects = new ProjectList(apps);
+        this.projects = new App.ProjectList(apps);
         var _this = this;
         _this.render();
 
@@ -60,7 +58,7 @@ var AppView = Backbone.View.extend({
             this.project = project;
             data['project'] = project;
         }
-        var template = _.template($("#project_form_template").html(), data);
+        var template = _.template($("#deploy_form_template").html(), data);
         this.$el.html(template);
         if($('embed-buttons').length > 0) {
             this.showEmbedButtons = true;
@@ -100,12 +98,12 @@ var AppView = Backbone.View.extend({
             email: email
         });
 
-        this.channel = pusher.subscribe(deploy_id);
+        this.channel = App.pusher.subscribe(deploy_id);
         this.channel.bind('info_update', this.updateInfoStatus);
         this.channel.bind('deployment_complete', this.deploymentSuccess);
         this.channel.bind('deployment_failed', this.deploymentFail);
 
-        var deploy = new Deployment({
+        var deploy = new App.Deployment({
             project: project_uri,
             email: email,
             deploy_id: deploy_id
@@ -133,8 +131,7 @@ var AppView = Backbone.View.extend({
 
     updateInfoStatus: function(data) {
         $("#info-message").text(data.message);
-        $('.progress-bar').width(data.percent + "%");
-        $('.progress-bar').attr("aria-valuenow", data.percent);
+        $('.progress-bar').width(data.percent + "%").attr("aria-valuenow", data.percent);
     },
 
     deploymentSuccess: function(data) {
@@ -165,7 +162,7 @@ var AppView = Backbone.View.extend({
     }
 });
 
-var EmbedView = Backbone.View.extend({
+App.EmbedView = Backbone.View.extend({
     events: {
         "click .btn": "generateEmbedCode"
     },
@@ -215,8 +212,8 @@ var EmbedView = Backbone.View.extend({
 });
 
 $(function(){
-    var appview = new AppView();
-    if(appview.showEmbedButtons === true) {
-        var embedview = new EmbedView({el: '#embed-buttons'});
+    App.appView  = new App.AppView();
+    if(App.appView.showEmbedButtons === true) {
+        App.embedView = new App.EmbedView({el: '#embed-buttons'});
     }
 });
