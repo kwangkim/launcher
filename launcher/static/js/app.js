@@ -1,5 +1,3 @@
-
-
 var App = App || {};
 
 App.API_ROOT = '/api/v1/';
@@ -30,7 +28,7 @@ App.Deployment = Backbone.Model.extend({
 });
 
 // Views
-App.AppView = Backbone.View.extend({
+App.DeployFormView = Backbone.View.extend({
     el: $('.container'),
 
     events: {
@@ -39,6 +37,7 @@ App.AppView = Backbone.View.extend({
 
     initialize: function() {
         this.projects = new App.ProjectList(apps);
+        this.showEmbedButtons = this.projects.length === 1;
         var _this = this;
         _this.render();
 
@@ -49,7 +48,7 @@ App.AppView = Backbone.View.extend({
         if ( window.self !== window.top ) {
             this.$el.addClass('iframe');
         }
-        data = {};
+        var data = {};
         if (this.projects.length > 1) {
             data['projects'] = this.projects.toJSON();
         }
@@ -60,12 +59,6 @@ App.AppView = Backbone.View.extend({
         }
         var template = _.template($("#deploy_form_template").html(), data);
         this.$el.html(template);
-        if($('embed-buttons').length > 0) {
-            this.showEmbedButtons = true;
-        }
-        else {
-            this.showEmbedButtons = true;
-        }
         return this;
     },
 
@@ -87,6 +80,7 @@ App.AppView = Backbone.View.extend({
         // creates a deployment app name from the project name and random characters
         var deploy_id = app_name.toLowerCase() + Math.random().toString().substr(2,6);
         deploy_id = deploy_id.replace(' ', '').replace('.', '').replace('-', '');
+        app_data['deploy_id'] = deploy_id;
 
         // tracks the user interaction
         analytics.identify(email, {
@@ -98,37 +92,43 @@ App.AppView = Backbone.View.extend({
             email: email
         });
 
-        this.channel = App.pusher.subscribe(deploy_id);
-        this.channel.bind('info_update', this.updateInfoStatus);
-        this.channel.bind('deployment_complete', this.deploymentSuccess);
-        this.channel.bind('deployment_failed', this.deploymentFail);
-
         var deploy = new App.Deployment({
             project: project_uri,
             email: email,
             deploy_id: deploy_id
         });
         if(deploy.isValid()) {
-            this.showInfoWindow(app_data);
+            App.deployStatusView = new App.DeployStatusView(app_data);
+            App.deployStatusView.render();
             deploy.save({}, {
-                error: this.deploymentFail
+                error: App.deployStatusView.deploymentFail
             });
         }
         else {
-            this.$('div.control-group').addClass('error');
-            var $errorMessage = $(".help-inline");
+            this.$('div.form-group').addClass('has-error');
+            var $errorMessage = $(".help-block");
             $errorMessage.text(deploy.validationError);
         }
-    },
+    }
 
-    showInfoWindow: function(app_data) {
-        var template = _.template($("#deploy_status_template").html(), {
-            app_name: app_data['app_name'],
-            survey_url: app_data['survey_url']
-        });
-        this.$el.html(template);
-    },
+});
 
+App.DeployStatusView = Backbone.View.extend({
+    el: $(".container"),
+    template: _.template($("#deploy_status_template").html()),
+    initialize: function(app_data) {
+        this.app_data = app_data;
+
+        // Pusher channel
+        this.channel = App.pusher.subscribe(this.app_data['deploy_id']);
+        this.channel.bind('info_update', this.updateInfoStatus);
+        this.channel.bind('deployment_complete', this.deploymentSuccess);
+        this.channel.bind('deployment_failed', this.deploymentFail);
+    },
+    render: function(){
+        var html = this.template(this.app_data);
+        this.$el.html(html);
+    },
     updateInfoStatus: function(data) {
         $("#info-message").text(data.message);
         $('.progress-bar').width(data.percent + "%").attr("aria-valuenow", data.percent);
@@ -212,8 +212,8 @@ App.EmbedView = Backbone.View.extend({
 });
 
 $(function(){
-    App.appView  = new App.AppView();
-    if(App.appView.showEmbedButtons === true) {
+    App.deployFormView  = new App.DeployFormView();
+    if(App.deployFormView.showEmbedButtons === true) {
         App.embedView = new App.EmbedView({el: '#embed-buttons'});
     }
 });
