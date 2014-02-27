@@ -107,16 +107,17 @@ class Deployment(models.Model):
             'percent': 30
         })
         headers = {
-            'content-type': 'application/json'
+            'content-type': 'application/json',
         }
         # run the container
         payload = {
             "image": self.project.image_name,
             "hosts": ["/api/v1/hosts/1/"],
             "ports": self.project.ports.split(' '),
-            "description": self.email or "",
-            "environment": self.project.env_vars.split(' ')
-            #"wait": 30
+            "command": "",
+            "links": "",
+            "memory": "",
+            "environment": self.project.env_vars,
         }
         r = requests.post(
             "{0}/api/v1/containers/?username={1}&api_key={2}".format(settings.SHIPYARD_HOST, settings.SHIPYARD_USER, settings.SHIPYARD_KEY),
@@ -132,6 +133,7 @@ class Deployment(models.Model):
                 'message': "Assigning an URL to the app...",
                 'percent': 60
             })
+            time.sleep(2)
             domain_name = "{0}.demo.appsembler.com".format(self.deploy_id)
             payload = {
                 "name": self.deploy_id,
