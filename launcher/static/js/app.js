@@ -1,25 +1,21 @@
-function validateEmail(email)
-{
-    var re = /\S+@\S+\.\S+/;
-    return re.test(email);
-}
+var App = App || {};
 
-var API_ROOT = '/api/v1/';
-var pusher = new Pusher('cea6dff5fc1f38a2d45d');
+App.API_ROOT = '/api/v1/';
+App.pusher = new Pusher('cea6dff5fc1f38a2d45d');
 
 // Models
-var Project = Backbone.Model.extend({});
+App.Project = Backbone.Model.extend({});
 
-var ProjectList = Backbone.Collection.extend({
-    model: Project,
-    url: API_ROOT + 'projects/',
+App.ProjectList = Backbone.Collection.extend({
+    model: App.Project,
+    url: App.API_ROOT + 'projects/',
     parse: function(response) {
         return response.objects;
     }
 });
 
-var Deployment = Backbone.Model.extend({
-    url: API_ROOT + 'deployments/',
+App.Deployment = Backbone.Model.extend({
+    url: App.API_ROOT + 'deployments/',
     validate: function(attrs, options) {
         var re = /\S+@\S+\.\S+/;
         if(attrs.email === "" || !re.test(attrs.email)) {
@@ -32,7 +28,7 @@ var Deployment = Backbone.Model.extend({
 });
 
 // Views
-var AppView = Backbone.View.extend({
+App.DeployFormView = Backbone.View.extend({
     el: $('.container'),
 
     events: {
@@ -40,7 +36,8 @@ var AppView = Backbone.View.extend({
     },
 
     initialize: function() {
-        this.projects = new ProjectList(apps);
+        this.projects = new App.ProjectList(apps);
+        this.showEmbedButtons = this.projects.length === 1;
         var _this = this;
         _this.render();
 
@@ -51,7 +48,7 @@ var AppView = Backbone.View.extend({
         if ( window.self !== window.top ) {
             this.$el.addClass('iframe');
         }
-        data = {};
+        var data = {};
         if (this.projects.length > 1) {
             data['projects'] = this.projects.toJSON();
         }
@@ -60,14 +57,8 @@ var AppView = Backbone.View.extend({
             this.project = project;
             data['project'] = project;
         }
-        var template = _.template($("#project_form_template").html(), data);
+        var template = _.template($("#deploy_form_template").html(), data);
         this.$el.html(template);
-        if($('embed-buttons').length > 0) {
-            this.showEmbedButtons = true;
-        }
-        else {
-            this.showEmbedButtons = true;
-        }
         return this;
     },
 
@@ -89,6 +80,7 @@ var AppView = Backbone.View.extend({
         // creates a deployment app name from the project name and random characters
         var deploy_id = app_name.toLowerCase() + Math.random().toString().substr(2,6);
         deploy_id = deploy_id.replace(' ', '').replace('.', '').replace('-', '');
+        app_data['deploy_id'] = deploy_id;
 
         // tracks the user interaction
         analytics.identify(email, {
@@ -100,41 +92,46 @@ var AppView = Backbone.View.extend({
             email: email
         });
 
-        this.channel = pusher.subscribe(deploy_id);
-        this.channel.bind('info_update', this.updateInfoStatus);
-        this.channel.bind('deployment_complete', this.deploymentSuccess);
-        this.channel.bind('deployment_failed', this.deploymentFail);
-
-        var deploy = new Deployment({
+        var deploy = new App.Deployment({
             project: project_uri,
             email: email,
             deploy_id: deploy_id
         });
         if(deploy.isValid()) {
-            this.showInfoWindow(app_data);
+            App.deployStatusView = new App.DeployStatusView(app_data);
+            App.deployStatusView.render();
             deploy.save({}, {
-                error: this.deploymentFail
+                error: App.deployStatusView.deploymentFail
             });
         }
         else {
-            this.$('div.control-group').addClass('error');
-            var $errorMessage = $(".help-inline");
+            this.$('div.form-group').addClass('has-error');
+            var $errorMessage = $(".help-block");
             $errorMessage.text(deploy.validationError);
         }
-    },
+    }
 
-    showInfoWindow: function(app_data) {
-        var template = _.template($("#deploy_status_template").html(), {
-            app_name: app_data['app_name'],
-            survey_url: app_data['survey_url']
-        });
-        this.$el.html(template);
-    },
+});
 
+App.DeployStatusView = Backbone.View.extend({
+    el: $(".container"),
+    template: _.template($("#deploy_status_template").html()),
+    initialize: function(app_data) {
+        this.app_data = app_data;
+
+        // Pusher channel
+        this.channel = App.pusher.subscribe(this.app_data['deploy_id']);
+        this.channel.bind('info_update', this.updateInfoStatus);
+        this.channel.bind('deployment_complete', this.deploymentSuccess);
+        this.channel.bind('deployment_failed', this.deploymentFail);
+    },
+    render: function(){
+        var html = this.template(this.app_data);
+        this.$el.html(html);
+    },
     updateInfoStatus: function(data) {
         $("#info-message").text(data.message);
-        $('.progress-bar').width(data.percent + "%");
-        $('.progress-bar').attr("aria-valuenow", data.percent);
+        $('.progress-bar').width(data.percent + "%").attr("aria-valuenow", data.percent);
     },
 
     deploymentSuccess: function(data) {
@@ -165,7 +162,7 @@ var AppView = Backbone.View.extend({
     }
 });
 
-var EmbedView = Backbone.View.extend({
+App.EmbedView = Backbone.View.extend({
     events: {
         "click .btn": "generateEmbedCode"
     },
@@ -184,28 +181,24 @@ var EmbedView = Backbone.View.extend({
         var size = $btn.data('size');
         var color = $btn.data('color');
         var slug = $btn.data('slug');
-        this.markdownTxt.text(this.generateMarkdownCode(size, color, slug));
-        this.htmlTxt.text(this.generateHTMLCode(size, color, slug));
-        this.restTxt.text(this.generateRestCode(size, color, slug));
-        this.imageTxt.text(this.generateImgURL(size, color));
+        var imgURL = this.generateImgURL(size, color);
+        var appURL = this.generateAppURL(slug);
+        this.markdownTxt.text(this.generateMarkdownCode(imgURL, appURL));
+        this.htmlTxt.text(this.generateHTMLCode(imgURL, appURL));
+        this.restTxt.text(this.generateRestCode(imgURL, appURL));
+        this.imageTxt.text(imgURL);
         return false;
     },
 
-    generateMarkdownCode: function(size, color, slug) {
-        var imgURL = this.generateImgURL(size, color);
-        var appURL = this.generateAppURL(slug);
+    generateMarkdownCode: function(imgURL, appURL) {
         return "[![Launch demo site]("+ imgURL + ")](" + appURL + ")";
     },
 
-    generateHTMLCode: function(size, color, slug) {
-        var imgURL = this.generateImgURL(size, color);
-        var appURL = this.generateAppURL(slug);
+    generateHTMLCode: function(imgURL, appURL) {
         return '<a href="' + appURL + '"><img src="' + imgURL + '"></a>';
     },
 
-    generateRestCode: function(size, color, slug) {
-        var imgURL = this.generateImgURL(size, color);
-        var appURL = this.generateAppURL(slug);
+    generateRestCode: function(imgURL, appURL) {
         return '.. image:: ' + imgURL+ '\n   :target: ' + appURL;
     },
 
@@ -219,8 +212,8 @@ var EmbedView = Backbone.View.extend({
 });
 
 $(function(){
-    var appview = new AppView();
-    if(appview.showEmbedButtons === true) {
-        var embedview = new EmbedView({el: '#embed-buttons'});
+    App.deployFormView  = new App.DeployFormView();
+    if(App.deployFormView.showEmbedButtons === true) {
+        App.embedView = new App.EmbedView({el: '#embed-buttons'});
     }
 });

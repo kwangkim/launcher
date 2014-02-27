@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.2
+
+* optimizations to celery worker settings
+* refactoring of frontend JS code
+* fix to work with newer version of Shipyard API
+
 ### 1.1
 
 * now using Bower for managing frontend packages
