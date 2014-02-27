@@ -1,6 +1,6 @@
 from .local import *
 
-DEBUG =True
+DEBUG = True
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -34,4 +34,9 @@ CELERYBEAT_SCHEDULE = {
     },
 }
 
-
+STATICFILES_FINDERS = (
+    'pipeline.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
+    'pipeline.finders.CachedFileFinder',
+)
