@@ -35,6 +35,7 @@ You also need working [Pusher](http://pusher.com/), [Customer.io](http://custome
 6. `cd appsembler-launch; setvirtualenvproject`
 7. Install the requirements: `pip install -r requirements/local.txt`
 8. Run syncdb: `./manage.py syncdb --settings=openshift_deploy.settings.local`
-9. Run migrations: `./manage.py migrate --settings=openshift_deploy.settings.local`
-10. Start celery in one shell: `./manage.py celery worker -B --loglevel=info --autoreload --settings=openshift_deploy.settings.local --concurrency=2 -s celerybeat-schedule`
-11. And runserver in other: `./manage.py runserver --settings=openshift_deploy.settings.local`
+9. Run migrations: `./manage.py migrate --settings=launcher.settings.local`
+10. Install JS libraries with Bower: `./manage.py bower_install -- --allow-root -f --settings=launcher.settings.local`
+11. Start celery in one shell: `./manage.py celery worker -B --loglevel=info --autoreload --settings=launcher.settings.local --concurrency=2 -s celerybeat-schedule`
+12. And runserver in other: `./manage.py runserver --settings=launcher.settings.local`
