@@ -37,5 +37,6 @@ You also need working [Pusher](http://pusher.com/), [Customer.io](http://custome
 8. Run syncdb: `./manage.py syncdb --settings=openshift_deploy.settings.local`
 9. Run migrations: `./manage.py migrate --settings=launcher.settings.local`
 10. Install JS libraries with Bower: `./manage.py bower_install -- --allow-root -f --settings=launcher.settings.local`
+11. Load test projects: `./manage.py loaddata deployment/fixtures/sample_projects.json`
 11. Start celery in one shell: `./manage.py celery worker -B --loglevel=info --autoreload --settings=launcher.settings.local --concurrency=2 -s celerybeat-schedule`
 12. And runserver in other: `./manage.py runserver --settings=launcher.settings.local`
