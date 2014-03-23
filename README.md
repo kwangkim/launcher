@@ -5,8 +5,8 @@ This instructions are written under the assumption that you have [virtualenvwrap
 
 You also need working [Pusher](http://pusher.com/), [Customer.io](http://customer.io/) accounts, and have [Docker](http://docker.io) and [Shipyard](http://shipyard-project.com/) running on a server somewhere.
 
-1. Create a new virtual env: `mkvirtualenv appsemblerlaunch`
-2. Set the required env variables in your virtual environments `bin/postactivate` script:
+1. Create a new virtual env: `mkvirtualenv launcher`
+2. Set the required env variables in your virtual environments `bin/postactivate` script, which is usually located in `~/.virtualenvs/launcher/bin/postactivate`
 
 		#!/usr/local/bin/zsh
 		# This hook is run after this virtualenv is activated.
@@ -30,14 +30,13 @@ You also need working [Pusher](http://pusher.com/), [Customer.io](http://custome
 		export CUSTOMERIO_API_KEY=''
 
 
-3. Clone this repo: `git clone git@github.com:appsembler/appsembler-launch.git`
-4. Switch to the Docker branch: `git checkout docker`
-5. Activate the virtualenv: `workon appsemblerlaunch`
-6. `cd appsembler-launch; setvirtualenvproject`
-7. Install the requirements: `pip install -r requirements/local.txt`
-8. Run syncdb: `./manage.py syncdb --settings=openshift_deploy.settings.local`
-9. Run migrations: `./manage.py migrate --settings=launcher.settings.local`
-10. Install JS libraries with Bower: `./manage.py bower_install -- --allow-root -f --settings=launcher.settings.local`
-11. Load test projects: `./manage.py loaddata deployment/fixtures/sample_projects.json`
-12. Start celery in one shell: `CELERY_ALWAYS_EAGER=True celery -A deployment.tasks worker -c 2 -l info -B`
-13. And runserver in other: `./manage.py runserver --settings=launcher.settings.local`
+3. Clone this repo: `git clone git@github.com:appsembler/launcher.git`
+4. Activate the virtualenv: `workon launcher`
+5. `cd launcher; setvirtualenvproject`
+6. Install the requirements: `pip install -r requirements/local.txt`
+7. Run syncdb: `./manage.py syncdb`
+8. Run migrations: `./manage.py migrate`
+9. Install JS libraries with Bower: `./manage.py bower_install -- --allow-root -f`
+10. Load sample projects: `./manage.py loaddata deployment/fixtures/sample_projects.json`
+11. Start Celery in one shell: `CELERY_ALWAYS_EAGER=True celery -A deployment.tasks worker -c 2 -l info -B`
+12. And runserver in other: `./manage.py runserver --settings=launcher.settings.local`
