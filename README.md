@@ -12,6 +12,7 @@ You also need working [Pusher](http://pusher.com/), [Customer.io](http://custome
 		# This hook is run after this virtualenv is activated.
 		
 		# Django settings
+		export DJANGO_SETTINGS_MODULE='launcher.settings.local'
 		export SECRET_KEY=''
 
 		# Pusher settings
