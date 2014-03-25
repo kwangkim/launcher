@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.2.1
+
+* fix for API timing bug on newer versions of Shipyard
+
 ### 1.2
 
 * optimizations to celery worker settings
