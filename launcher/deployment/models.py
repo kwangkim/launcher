@@ -125,6 +125,8 @@ class Deployment(models.Model):
             headers=headers
         )
         if r.status_code == 201:
+            # This sleep is needed to avoid problems with the API
+            time.sleep(3)
             container_uri = urlparse(r.headers['location']).path
             self.remote_container_id = container_uri.split('/')[-2]
 
