@@ -24,7 +24,12 @@ class Project(models.Model):
     name = models.CharField(max_length=100)
     github_url = models.CharField(max_length=200)
     image_name = models.CharField(max_length=300)
-    ports = models.CharField(max_length=300, help_text="Internally exposed port, example: 80")
+    ports = models.CharField(max_length=300, help_text="Internally exposed ports separated by spaces, example: 80 8080")
+    hostnames = models.CharField(
+        max_length=300,
+        help_text="Hostnames separated by spaces, needed when multiple ports are exposed, example: lms cms",
+        blank=True
+    )
     env_vars = models.CharField(max_length=500, blank=True,
                                 help_text="Space separated environment variables, example: key1=val1 key2=val2")
     trial_duration = models.IntegerField(default=60, help_text="Trial duration in minutes")
