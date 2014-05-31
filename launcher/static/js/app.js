@@ -142,8 +142,13 @@ App.DeployStatusView = Backbone.View.extend({
         $(".form-deploy h3").text("Deployed " + data['app_name']);
         $info.removeClass('alert-info').addClass('alert-success');
         $info.html('<span class="glyphicon glyphicon-ok"></span> ' + data['message']);
-        var app_link = '<a class="app-url" href="' + data['app_url'] + '">' + data['app_url'] + '</a>';
-        $(app_link).insertAfter($info);
+        var urls = [];
+        $.each(data.app_url.split(" "), function() {
+            var app_link = $('<p><a class="app-url" href="' + this + '">' + this + '</a></p>');
+            urls.push(app_link);
+        });
+        $info.after(urls);
+
         if(data['username'] || data['password']) {
             var auth_data = '<div class="alert alert-info auth-details">Authentication details<br/>' +
                             '<strong>Username:</strong> ' + data['username'] + '<br/>' +

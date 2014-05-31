@@ -43,14 +43,15 @@ def destroy_expired_apps():
                     settings.SHIPYARD_KEY
                 ),
             )
-            r = requests.delete(
-                "{0}/api/v1/applications/{1}/?username={2}&api_key={3}".format(
-                    settings.SHIPYARD_HOST,
-                    app.remote_app_id,
-                    settings.SHIPYARD_USER,
-                    settings.SHIPYARD_KEY
-                ),
-            )
+            for app_id in app.remote_app_id.split(" "):
+                r = requests.delete(
+                    "{0}/api/v1/applications/{1}/?username={2}&api_key={3}".format(
+                        settings.SHIPYARD_HOST,
+                        app_id,
+                        settings.SHIPYARD_USER,
+                        settings.SHIPYARD_KEY
+                    ),
+                )
 
 
 @app.task
