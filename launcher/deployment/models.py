@@ -24,7 +24,12 @@ class Project(models.Model):
     name = models.CharField(max_length=100)
     github_url = models.CharField(max_length=200)
     image_name = models.CharField(max_length=300)
-    ports = models.CharField(max_length=300, help_text="Internally exposed port, example: 80")
+    ports = models.CharField(max_length=300, help_text="Internally exposed ports separated by spaces, example: 80 8080")
+    hostnames = models.CharField(
+        max_length=300,
+        help_text="Hostnames separated by spaces, needed when multiple ports are exposed, example: lms cms",
+        blank=True
+    )
     env_vars = models.CharField(max_length=500, blank=True,
                                 help_text="Space separated environment variables, example: key1=val1 key2=val2")
     trial_duration = models.IntegerField(default=60, help_text="Trial duration in minutes")
@@ -57,11 +62,11 @@ class Deployment(models.Model):
         ('Expired', 'Expired')
     )
     project = models.ForeignKey(Project, related_name='deployments')
-    url = models.CharField(max_length=200)
+    url = models.CharField(max_length=600)
     email = models.EmailField()
     deploy_id = models.CharField(max_length=100)
     remote_container_id = models.IntegerField(default=0)
-    remote_app_id = models.IntegerField(default=0)
+    remote_app_id = models.CharField(max_length=100)
     launch_time = models.DateTimeField(blank=True, null=True)
     expiration_time = models.DateTimeField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -110,10 +115,12 @@ class Deployment(models.Model):
             'content-type': 'application/json',
         }
         # run the container
+        ports = self.project.ports.split(' ')
+        hostnames = self.project.hostnames.split(' ')
         payload = {
             "image": self.project.image_name,
             "hosts": ["/api/v1/hosts/1/"],
-            "ports": self.project.ports.split(' '),
+            "ports": ports,
             "command": "",
             "links": "",
             "memory": "",
@@ -136,23 +143,30 @@ class Deployment(models.Model):
                 'percent': 60
             })
             time.sleep(2)
-            domain_name = "{0}.demo.appsembler.com".format(self.deploy_id)
-            payload = {
-                "name": self.deploy_id,
-                "description": "{0} for {1}".format(self.project.name, self.email),
-                "domain_name": domain_name,
-                "backend_port": self.project.ports,
-                "protocol": "https" if "443" in self.project.ports else "http",
-                "containers": [container_uri]
-            }
-            r = requests.post(
-                "{0}/api/v1/applications/?username={1}&api_key={2}".format(settings.SHIPYARD_HOST, settings.SHIPYARD_USER, settings.SHIPYARD_KEY),
-                data=json.dumps(payload),
-                headers=headers
-            )
-            if r.status_code == 201:
-                app_uri = urlparse(r.headers['location']).path
-                self.remote_app_id = app_uri.split('/')[-2]
+            app_ids = []
+            domains = []
+            for port, hostname in zip(ports, hostnames):
+                domain_name = "{0}.demo.appsembler.com".format(self.deploy_id)
+                if hostname:
+                    domain_name = "{0}-{1}".format(hostname, domain_name)
+                domains.append(domain_name)
+                payload = {
+                    "name": self.deploy_id,
+                    "description": "{0} for {1}".format(self.project.name, self.email),
+                    "domain_name": domain_name,
+                    "backend_port": port,
+                    "protocol": "https" if "443" in self.project.ports else "http",
+                    "containers": [container_uri]
+                }
+                r = requests.post(
+                    "{0}/api/v1/applications/?username={1}&api_key={2}".format(settings.SHIPYARD_HOST, settings.SHIPYARD_USER, settings.SHIPYARD_KEY),
+                    data=json.dumps(payload),
+                    headers=headers
+                )
+                if r.status_code == 201:
+                    app_uri = urlparse(r.headers['location']).path
+                    app_ids.append(app_uri.split('/')[-2])
+            self.remote_app_id = " ".join(app_ids)
         status = r.status_code
         time.sleep(1)
         instance[self.deploy_id].trigger('info_update', {
@@ -162,15 +176,18 @@ class Deployment(models.Model):
         time.sleep(1)
         if status == 201:
             scheme = "https" if "443" in self.project.ports else "http"
-            app_url = "{0}://{1}".format(scheme, domain_name)
-            self.url = app_url
+            app_urls = []
+            for domain in domains:
+                app_url = "{0}://{1}".format(scheme, domain)
+                app_urls.append(app_url)
+            self.url = " ".join(app_urls)
             self.status = 'Completed'
             self.launch_time = timezone.now()
             self.expiration_time = self.expiration_datetime()
             instance[self.deploy_id].trigger('deployment_complete', {
                 'app_name': self.project.name,
                 'message': "Deployment complete!",
-                'app_url': app_url,
+                'app_url': self.url,
                 'username': self.project.default_username,
                 'password': self.project.default_password
             })
@@ -178,7 +195,7 @@ class Deployment(models.Model):
                 cio = CustomerIO(settings.CUSTOMERIO_SITE_ID, settings.CUSTOMERIO_API_KEY)
                 cio.track(customer_id=self.email,
                           name='app_deploy_complete',
-                          app_url=app_url,
+                          app_url=self.url.replace(" ", "\n"),
                           app_name=self.project.name,
                           status_url="http://launcher.appsembler.com" + reverse('deployment_detail', kwargs={'deploy_id': self.deploy_id}),
                           username=self.project.default_username,
@@ -200,7 +217,7 @@ class Deployment(models.Model):
                 customer_id=self.email,
                 name='app_expiring_soon',
                 app_name=self.project.name,
-                app_url=self.url,
+                app_url=self.url.replace(" ", "\n"),
                 status_url="http://launcher.appsembler.com" + reverse('deployment_detail', kwargs={'deploy_id': self.deploy_id}),
                 remaining_minutes=self.get_remaining_minutes(),
                 expiration_time=timezone.localtime(self.expiration_time).isoformat()

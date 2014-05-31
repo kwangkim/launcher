@@ -41,6 +41,7 @@ MANDRILL_API_KEY = get_env_variable('MANDRILL_API_KEY')
 
 # Celery settings
 BROKER_URL = "redis://localhost:6379/0"
+CELERY_IGNORE_RESULT = True
 
 CELERYBEAT_SCHEDULE = {
     'app-expires-soon-notify': {
