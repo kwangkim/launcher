@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.3
+
+* multiple exposed ports on a container are now exposed on different URLs
+* updated the Vagrantfile to work with version 1.5 of Vagrant
+
 ### 1.2.1
 
 * fix for API timing bug on newer versions of Shipyard
