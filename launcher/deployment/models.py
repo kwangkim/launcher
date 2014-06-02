@@ -33,7 +33,7 @@ class Project(models.Model):
     env_vars = models.CharField(max_length=500, blank=True,
                                 help_text="Space separated environment variables, example: key1=val1 key2=val2")
     trial_duration = models.IntegerField(default=60, help_text="Trial duration in minutes")
-    slug = models.SlugField(max_length=40, editable=False, blank=True, null=True)
+    slug = models.SlugField(max_length=40, editable=True, blank=True, null=True)
     status = StatusField(default=STATUS.Inactive)
     default_username = models.CharField(max_length=30, blank=True)
     default_password = models.CharField(max_length=30, blank=True)
