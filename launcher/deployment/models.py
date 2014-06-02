@@ -126,6 +126,15 @@ class Deployment(models.Model):
             "memory": "",
             "environment": self.project.env_vars,
         }
+        if "edx" in self.project.name.lower():
+            edx_env = []
+            edx_env.append("EDX_LMS_BASE=lms-{0}.demo.appsembler.com".format(self.deploy_id))
+            edx_env.append("EDX_PREVIEW_LMS_BASE=lms-{0}.demo.appsembler.com".format(self.deploy_id))
+            edx_env.append("EDX_CMS_BASE=cms-{0}.demo.appsembler.com".format(self.deploy_id))
+            env_string = " ".join(edx_env)
+            env_string = " " + env_string
+            payload['environment'] += env_string
+
         r = requests.post(
             "{0}/api/v1/containers/?username={1}&api_key={2}".format(settings.SHIPYARD_HOST, settings.SHIPYARD_USER, settings.SHIPYARD_KEY),
             data=json.dumps(payload),
