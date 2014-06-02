@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.3.1
+
+* edx specific env settings added
+* survey form opens when the deploy button is clicked
+* project slugs are editable in the admin
+
 ### 1.3
 
 * multiple exposed ports on a container are now exposed on different URLs

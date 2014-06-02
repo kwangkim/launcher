@@ -33,7 +33,7 @@ class Project(models.Model):
     env_vars = models.CharField(max_length=500, blank=True,
                                 help_text="Space separated environment variables, example: key1=val1 key2=val2")
     trial_duration = models.IntegerField(default=60, help_text="Trial duration in minutes")
-    slug = models.SlugField(max_length=40, editable=False, blank=True, null=True)
+    slug = models.SlugField(max_length=40, editable=True, blank=True, null=True)
     status = StatusField(default=STATUS.Inactive)
     default_username = models.CharField(max_length=30, blank=True)
     default_password = models.CharField(max_length=30, blank=True)
@@ -126,6 +126,15 @@ class Deployment(models.Model):
             "memory": "",
             "environment": self.project.env_vars,
         }
+        if "edx" in self.project.name.lower():
+            edx_env = []
+            edx_env.append("EDX_LMS_BASE=lms-{0}.demo.appsembler.com".format(self.deploy_id))
+            edx_env.append("EDX_PREVIEW_LMS_BASE=lms-{0}.demo.appsembler.com".format(self.deploy_id))
+            edx_env.append("EDX_CMS_BASE=cms-{0}.demo.appsembler.com".format(self.deploy_id))
+            env_string = " ".join(edx_env)
+            env_string = " " + env_string
+            payload['environment'] += env_string
+
         r = requests.post(
             "{0}/api/v1/containers/?username={1}&api_key={2}".format(settings.SHIPYARD_HOST, settings.SHIPYARD_USER, settings.SHIPYARD_KEY),
             data=json.dumps(payload),
