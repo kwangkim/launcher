@@ -74,6 +74,9 @@ App.DeployFormView = Backbone.View.extend({
     deploy: function(e) {
         e.preventDefault();
         app_data = this.get_app_data();
+        if (app_data.survey_url !== "") {
+            window.open(app_data.survey_url, null, 'height=1204, width=680, toolbar=0, location=0, status=1, scrollbars=1, resizable=1');
+        }
         var project_uri = app_data['project_uri'];
         var app_name = app_data['app_name'];
         var email = this.$('input[name=email]').val();
