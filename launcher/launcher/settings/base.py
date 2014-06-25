@@ -266,7 +266,7 @@ PIPELINE_JS = {
     },
     'countdown': {
         'source_filenames': (
-            'js/jquery.countdown.min.js',
+            'kbwood_countdown/jquery.countdown.js',
         ),
         'output_filename': 'js/countdown.min.js'
 

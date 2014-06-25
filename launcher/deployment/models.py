@@ -207,6 +207,7 @@ class Deployment(models.Model):
                           app_url=self.url.replace(" ", "\n"),
                           app_name=self.project.name,
                           status_url="http://launcher.appsembler.com" + reverse('deployment_detail', kwargs={'deploy_id': self.deploy_id}),
+                          trial_duration=self.project.trial_duration,
                           username=self.project.default_username,
                           password=self.project.default_password
                 )

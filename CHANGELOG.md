@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.3.2
+
+* updated Django to 1.6.5
+
+
 ### 1.3.1
 
 * edx specific env settings added
