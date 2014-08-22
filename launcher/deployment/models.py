@@ -175,6 +175,7 @@ class Deployment(models.Model):
                 if r.status_code == 201:
                     app_uri = urlparse(r.headers['location']).path
                     app_ids.append(app_uri.split('/')[-2])
+                time.sleep(2)
             self.remote_app_id = " ".join(app_ids)
         status = r.status_code
         time.sleep(1)
