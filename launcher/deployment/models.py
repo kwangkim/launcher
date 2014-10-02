@@ -6,6 +6,7 @@ import requests
 import time
 from urlparse import urlparse
 from django.conf import settings
+from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
@@ -216,6 +217,13 @@ class Deployment(models.Model):
             self.status = 'Failed'
             error_log = DeploymentErrorLog(deployment=self, http_status=status, error_log=r.text)
             error_log.save()
+            send_mail(
+                "Deployment failed: {0}".format(self.deploy_id),
+                "Error log link: {0}".format(reverse('admin:deployment_deploymenterrorlog_change', args=(error_log.id,))),
+                'info@appsembler.com',
+                ['filip@appsembler.com', 'nate@appsembler.com']
+
+            )
             instance[self.deploy_id].trigger('deployment_failed', {
                 'message': "Deployment failed!",
             })
