@@ -294,6 +294,10 @@ PUSHER_APP_SECRET = get_env_variable('PUSHER_APP_SECRET')
 CUSTOMERIO_SITE_ID = get_env_variable('CUSTOMERIO_SITE_ID')
 CUSTOMERIO_API_KEY = get_env_variable('CUSTOMERIO_API_KEY')
 
+# Intercom.io settings
+INTERCOM_APP_ID = get_env_variable('INTERCOM_APP_ID')
+INTERCOM_API_KEY = get_env_variable('INTERCOM_API_KEY')
+
 # Docker settings
 SHIPYARD_HOST = get_env_variable('SHIPYARD_HOST')
 SHIPYARD_USER = get_env_variable('SHIPYARD_USER')
