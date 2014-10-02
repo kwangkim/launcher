@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.3.4
+
+* upgrade raven(Sentry) to 5.0.0
+
 ### 1.3.3
 
 * fix for app names containing multiple space/dash/colon characters
