@@ -82,7 +82,7 @@ App.DeployFormView = Backbone.View.extend({
         var email = this.$('input[name=email]').val();
         // creates a deployment app name from the project name and random characters
         var deploy_id = app_name.toLowerCase() + Math.random().toString().substr(2,6);
-        deploy_id = deploy_id.replace(' ', '').replace('.', '').replace('-', '');
+        deploy_id = deploy_id.replace(/[. -]/g, '');
         app_data['deploy_id'] = deploy_id;
 
         // tracks the user interaction
