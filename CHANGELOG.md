@@ -1,9 +1,12 @@
 # Changelog
 
+### 1.3.3
+
+* fix for app names containing multiple space/dash/colon characters
+
 ### 1.3.2
 
 * updated Django to 1.6.5
-
 
 ### 1.3.1
 
