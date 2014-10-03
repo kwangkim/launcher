@@ -121,6 +121,16 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages"
+)
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -293,6 +303,10 @@ PUSHER_APP_SECRET = get_env_variable('PUSHER_APP_SECRET')
 # Customer.io settings
 CUSTOMERIO_SITE_ID = get_env_variable('CUSTOMERIO_SITE_ID')
 CUSTOMERIO_API_KEY = get_env_variable('CUSTOMERIO_API_KEY')
+
+# Intercom.io settings
+INTERCOM_APP_ID = get_env_variable('INTERCOM_APP_ID')
+INTERCOM_API_KEY = get_env_variable('INTERCOM_API_KEY')
 
 # Docker settings
 SHIPYARD_HOST = get_env_variable('SHIPYARD_HOST')
