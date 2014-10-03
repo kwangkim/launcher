@@ -165,7 +165,7 @@ App.DeployStatusView = Backbone.View.extend({
         $("div.progress").hide();
         $("img.spinner").hide();
         var $info = $("#info-message-section");
-        $info.removeClass('alert-info').addClass('alert-error');
+        $info.removeClass('alert-info').addClass('alert-danger');
         $info.html('<span class="glyphicon glyphicon-remove"></span> ' + data['message']);
     }
 });
