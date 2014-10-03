@@ -2,6 +2,7 @@ var App = App || {};
 
 App.API_ROOT = '/api/v1/';
 App.pusher = new Pusher('cea6dff5fc1f38a2d45d');
+App.INTERCOM_APP_ID = '9295scpa';
 
 // Models
 App.Project = Backbone.Model.extend({});
@@ -85,15 +86,12 @@ App.DeployFormView = Backbone.View.extend({
         deploy_id = deploy_id.replace(/[. -]/g, '');
         app_data['deploy_id'] = deploy_id;
 
-        // tracks the user interaction
-        analytics.identify(email, {
-            email: email
-        });
-        analytics.track('Deployed an app', {
-            app_name: app_name,
-            deploy_id: deploy_id,
-            email: email
-        });
+        window.Intercom('boot', {
+                app_id: App.INTERCOM_APP_ID,
+                email: email,
+                user_agent_data: navigator.userAgent
+            }
+        );
 
         var deploy = new App.Deployment({
             project: project_uri,
@@ -131,10 +129,12 @@ App.DeployStatusView = Backbone.View.extend({
     render: function(){
         var html = this.template(this.app_data);
         this.$el.html(html);
+        Intercom('update');
     },
     updateInfoStatus: function(data) {
         $("#info-message").text(data.message);
         $('.progress-bar').width(data.percent + "%").attr("aria-valuenow", data.percent);
+        Intercom('update');
     },
 
     deploymentSuccess: function(data) {
@@ -159,14 +159,16 @@ App.DeployStatusView = Backbone.View.extend({
                             '</div>';
             $(auth_data).insertAfter($info);
         }
+        Intercom('update');
 },
 
     deploymentFail: function(data) {
         $("div.progress").hide();
         $("img.spinner").hide();
         var $info = $("#info-message-section");
-        $info.removeClass('alert-info').addClass('alert-error');
+        $info.removeClass('alert-info').addClass('alert-danger');
         $info.html('<span class="glyphicon glyphicon-remove"></span> ' + data['message']);
+        Intercom('update');
     }
 });
 

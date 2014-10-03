@@ -5,18 +5,24 @@ import pusher
 import requests
 import time
 from urlparse import urlparse
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils import timezone
+
 from customerio import CustomerIO
+from intercom import Event, Intercom
 from model_utils.fields import StatusField
 from model_utils import Choices
 from .tasks import deploy
 
 logger = logging.getLogger(__name__)
+
+Intercom.app_id = settings.INTERCOM_APP_ID
+Intercom.api_key = settings.INTERCOM_API_KEY
 
 
 class Project(models.Model):
@@ -87,6 +93,14 @@ class Deployment(models.Model):
             self.status = 'Deploying'
         super(Deployment, self).save(*args, **kwargs)
         if self.status == 'Deploying':
+            Event.create(
+                event_name="deployed_app",
+                email=self.email,
+                metadata={
+                    'app_name': self.project.name,
+                    'deploy_id': self.deploy_id,
+                }
+            )
             deploy.delay(self)
 
     def get_remaining_seconds(self):
