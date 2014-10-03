@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.4.0
+
+* replaced Segment.io with Intercom analytics
+
 ### 1.3.4
 
 * upgrade raven(Sentry) to 5.0.0
