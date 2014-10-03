@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.4.2
+
+* fixed calculating remaining time for a deployment
+
 ### 1.4.1
 
 * add Intercom keys to Ansible secret_keys
