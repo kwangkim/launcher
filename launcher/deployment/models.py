@@ -106,13 +106,13 @@ class Deployment(models.Model):
     def get_remaining_seconds(self):
         if self.expiration_time and self.expiration_time > timezone.now():
             diff = self.expiration_time - timezone.now()
-            return diff.seconds
+            return int(diff.total_seconds())
         return 0
 
     def get_remaining_minutes(self):
         if self.expiration_time and self.expiration_time > timezone.now():
             diff = self.expiration_time - timezone.now()
-            remaining_minutes = diff.seconds / 60
+            remaining_minutes = int(diff.total_seconds() / 60)
             return remaining_minutes
         return 0
     get_remaining_minutes.short_description = 'Minutes remaining'
