@@ -14,7 +14,7 @@ from django.template.defaultfilters import slugify
 from django.utils import timezone
 
 from customerio import CustomerIO
-from intercom import Event, Intercom
+from intercom import Event, Intercom, User
 from model_utils.fields import StatusField
 from model_utils import Choices
 from .tasks import deploy
@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 Intercom.app_id = settings.INTERCOM_APP_ID
 Intercom.api_key = settings.INTERCOM_API_KEY
+Intercom.api_endpoint = 'https://api.intercom.io/'
 
 
 class Project(models.Model):
@@ -93,6 +94,9 @@ class Deployment(models.Model):
             self.status = 'Deploying'
         super(Deployment, self).save(*args, **kwargs)
         if self.status == 'Deploying':
+            User.create(
+                email=self.email
+            )
             Event.create(
                 event_name="deployed_app",
                 email=self.email,
