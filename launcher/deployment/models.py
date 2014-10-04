@@ -94,6 +94,7 @@ class Deployment(models.Model):
             self.status = 'Deploying'
         super(Deployment, self).save(*args, **kwargs)
         if self.status == 'Deploying':
+            deploy.delay(self)
             User.create(
                 email=self.email
             )
@@ -105,7 +106,6 @@ class Deployment(models.Model):
                     'deploy_id': self.deploy_id,
                 }
             )
-            deploy.delay(self)
 
     def get_remaining_seconds(self):
         if self.expiration_time and self.expiration_time > timezone.now():
@@ -126,6 +126,8 @@ class Deployment(models.Model):
 
     def deploy(self):
         instance = self._get_pusher_instance()
+        cio = CustomerIO(settings.CUSTOMERIO_SITE_ID, settings.CUSTOMERIO_API_KEY)
+        cio.identify(id=self.email, email=self.email)
         instance[self.deploy_id].trigger('info_update', {
             'message': "Creating a new container...",
             'percent': 30
@@ -221,7 +223,6 @@ class Deployment(models.Model):
                 'password': self.project.default_password
             })
             if self.email:
-                cio = CustomerIO(settings.CUSTOMERIO_SITE_ID, settings.CUSTOMERIO_API_KEY)
                 cio.track(customer_id=self.email,
                           name='app_deploy_complete',
                           app_url=self.url.replace(" ", "\n"),
