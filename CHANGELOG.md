@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.4.3
+
+* use Intercom v2 API to create a user
+
 ### 1.4.2
 
 * fixed calculating remaining time for a deployment
