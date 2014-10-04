@@ -2,7 +2,7 @@ var App = App || {};
 
 App.API_ROOT = '/api/v1/';
 App.pusher = new Pusher('cea6dff5fc1f38a2d45d');
-App.INTERCOM_APP_ID = '9295scpa';
+App.INTERCOM_APP_ID = 'tf1udglv';
 
 // Models
 App.Project = Backbone.Model.extend({});

@@ -1,5 +1,17 @@
 # Changelog
 
+### 1.4.5
+
+* add required customer.io identify call
+
+### 1.4.4
+
+* fix the app id for intercom
+
+### 1.4.3
+
+* use Intercom v2 API to create a user
+
 ### 1.4.2
 
 * fixed calculating remaining time for a deployment
