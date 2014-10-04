@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.4.5
+
+* add required customer.io identify call
+
 ### 1.4.4
 
 * fix the app id for intercom
