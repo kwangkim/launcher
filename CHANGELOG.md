@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.5.0
+
+* enable Intercom tracking for launched edX containers
+
 ### 1.4.5
 
 * add required customer.io identify call
