@@ -308,6 +308,7 @@ CUSTOMERIO_API_KEY = get_env_variable('CUSTOMERIO_API_KEY')
 INTERCOM_APP_ID = get_env_variable('INTERCOM_APP_ID')
 INTERCOM_API_KEY = get_env_variable('INTERCOM_API_KEY')
 INTERCOM_EDX_APP_ID = get_env_variable('INTERCOM_EDX_APP_ID')
+INTERCOM_EDX_APP_SECRET = get_env_variable('INTERCOM_EDX_APP_SECRET')
 
 # Docker settings
 SHIPYARD_HOST = get_env_variable('SHIPYARD_HOST')
