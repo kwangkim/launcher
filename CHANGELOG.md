@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.5.1
+
+* enable secure mode for Intercom edX tracking
+
 ### 1.5.0
 
 * enable Intercom tracking for launched edX containers
