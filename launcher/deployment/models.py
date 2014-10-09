@@ -153,6 +153,7 @@ class Deployment(models.Model):
             edx_env.append("EDX_PREVIEW_LMS_BASE=lms-{0}.demo.appsembler.com".format(self.deploy_id))
             edx_env.append("EDX_CMS_BASE=cms-{0}.demo.appsembler.com".format(self.deploy_id))
             edx_env.append("INTERCOM_APP_ID={0}".format(settings.INTERCOM_EDX_APP_ID))
+            edx_env.append("INTERCOM_APP_SECRET={0}".format(settings.INTERCOM_EDX_APP_SECRET))
             edx_env.append("INTERCOM_USER_EMAIL={0}".format(self.email))
             env_string = " ".join(edx_env)
             env_string = " " + env_string
