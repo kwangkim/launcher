@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.5.2
+
+* forgot to include app secret in the settings file
+
 ### 1.5.1
 
 * enable secure mode for Intercom edX tracking
