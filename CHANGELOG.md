@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.5.3
+
+* send app url to Intercom
+
 ### 1.5.2
 
 * forgot to include app secret in the settings file
