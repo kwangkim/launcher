@@ -77,7 +77,7 @@ class Deployment(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, related_name="deployments")
     email = models.EmailField()
     deploy_id = models.CharField(max_length=100)
-    remote_container_id = models.IntegerField(default=0)
+    remote_container_id = models.CharField(max_length=64)
     remote_app_id = models.CharField(max_length=100)
     launch_time = models.DateTimeField(blank=True, null=True)
     expiration_time = models.DateTimeField(blank=True, null=True)
@@ -136,24 +136,31 @@ class Deployment(models.Model):
         })
         headers = {
             'content-type': 'application/json',
+            'X-Service-Key': settings.SHIPYARD_KEY
         }
         # run the container
         ports = self.project.ports.split(' ')
-        hostnames = self.project.hostnames.split(' ')
+        if self.project.env_vars:
+            env_vars = dict(item.split("=") for item in self.project.env_vars.split(" "))
+        else:
+            env_vars = {}
+        ports = [{"proto": "tcp", "container_port": int(port)} for port in ports]
         payload = {
-            "image": self.project.image_name,
-            "hosts": ["/api/v1/hosts/1/"],
-            "ports": ports,
-            "command": "",
-            "links": "",
-            "memory": "",
-            "environment": self.project.env_vars,
+            "name": self.project.image_name,
+            "cpus": 0.1,
+            "memory": 128,
+            "type": "service",
+            "hostname": self.deploy_id,
+            "domain": settings.DEMO_APPS_CUSTOM_DOMAIN,
+            "labels": ["dev"],
+            "environment": env_vars,
+            "bind_ports": ports
         }
         if "edx" in self.project.name.lower():
             edx_env = []
-            edx_env.append("EDX_LMS_BASE=lms-{0}.demo.appsembler.com".format(self.deploy_id))
-            edx_env.append("EDX_PREVIEW_LMS_BASE=lms-{0}.demo.appsembler.com".format(self.deploy_id))
-            edx_env.append("EDX_CMS_BASE=cms-{0}.demo.appsembler.com".format(self.deploy_id))
+            edx_env.append("EDX_LMS_BASE=lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+            edx_env.append("EDX_PREVIEW_LMS_BASE=lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+            edx_env.append("EDX_CMS_BASE=cms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
             edx_env.append("INTERCOM_APP_ID={0}".format(settings.INTERCOM_EDX_APP_ID))
             edx_env.append("INTERCOM_APP_SECRET={0}".format(settings.INTERCOM_EDX_APP_SECRET))
             edx_env.append("INTERCOM_USER_EMAIL={0}".format(self.email))
@@ -162,55 +169,22 @@ class Deployment(models.Model):
             payload['environment'] += env_string
 
         r = requests.post(
-            "{0}/api/v1/containers/?username={1}&api_key={2}".format(settings.SHIPYARD_HOST, settings.SHIPYARD_USER, settings.SHIPYARD_KEY),
+            "{0}/api/containers".format(settings.SHIPYARD_HOST),
             data=json.dumps(payload),
             headers=headers
         )
         if r.status_code == 201:
+            response = r.json()
+            self.remote_container_id = response[0]['id']
             # This sleep is needed to avoid problems with the API
-            time.sleep(3)
-            container_uri = urlparse(r.headers['location']).path
-            self.remote_container_id = container_uri.split('/')[-2]
-
-            # create the app (for dynamic routing)
+            time.sleep(2)
             instance[self.deploy_id].trigger('info_update', {
                 'message': "Assigning an URL to the app...",
-                'percent': 60
+                'percent': 75
             })
             time.sleep(2)
-            app_ids = []
             domains = []
-            for port, hostname in zip(ports, hostnames):
-                domain_name = "{0}.demo.appsembler.com".format(self.deploy_id)
-                if hostname:
-                    domain_name = "{0}-{1}".format(hostname, domain_name)
-                domains.append(domain_name)
-                payload = {
-                    "name": self.deploy_id,
-                    "description": "{0} for {1}".format(self.project.name, self.email),
-                    "domain_name": domain_name,
-                    "backend_port": port,
-                    "protocol": "https" if "443" in self.project.ports else "http",
-                    "containers": [container_uri]
-                }
-                r = requests.post(
-                    "{0}/api/v1/applications/?username={1}&api_key={2}".format(settings.SHIPYARD_HOST, settings.SHIPYARD_USER, settings.SHIPYARD_KEY),
-                    data=json.dumps(payload),
-                    headers=headers
-                )
-                if r.status_code == 201:
-                    app_uri = urlparse(r.headers['location']).path
-                    app_ids.append(app_uri.split('/')[-2])
-                time.sleep(2)
-            self.remote_app_id = " ".join(app_ids)
-        status = r.status_code
-        time.sleep(1)
-        instance[self.deploy_id].trigger('info_update', {
-            'message': "Getting information...",
-            'percent': 90
-        })
-        time.sleep(1)
-        if status == 201:
+            domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
             scheme = "https" if "443" in self.project.ports else "http"
             app_urls = []
             for domain in domains:
@@ -241,18 +215,20 @@ class Deployment(models.Model):
                           name='app_deploy_complete',
                           app_url=self.url.replace(" ", "\n"),
                           app_name=self.project.name,
-                          status_url="http://launcher.appsembler.com" + reverse('deployment_detail', kwargs={'deploy_id': self.deploy_id}),
+                          status_url="http://launcher.appsembler.com" + reverse(
+                              'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
                           trial_duration=self.project.trial_duration,
                           username=self.project.default_username,
                           password=self.project.default_password
                 )
         else:
             self.status = 'Failed'
-            error_log = DeploymentErrorLog(deployment=self, http_status=status, error_log=r.text)
+            error_log = DeploymentErrorLog(deployment=self, http_status=r.status_code, error_log=r.text)
             error_log.save()
             send_mail(
                 "Deployment failed: {0}".format(self.deploy_id),
-                "Error log link: {0}".format(reverse('admin:deployment_deploymenterrorlog_change', args=(error_log.id,))),
+                "Error log link: http://launcher.appsembler.com{0}".format(
+                    reverse('admin:deployment_deploymenterrorlog_change', args=(error_log.id,))),
                 'info@appsembler.com',
                 ['filip@appsembler.com', 'nate@appsembler.com']
 
@@ -270,7 +246,8 @@ class Deployment(models.Model):
                 name='app_expiring_soon',
                 app_name=self.project.name,
                 app_url=self.url.replace(" ", "\n"),
-                status_url="http://launcher.appsembler.com" + reverse('deployment_detail', kwargs={'deploy_id': self.deploy_id}),
+                status_url="http://launcher.appsembler.com" + reverse(
+                    'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
                 remaining_minutes=self.get_remaining_minutes(),
                 expiration_time=timezone.localtime(self.expiration_time).isoformat()
             )
