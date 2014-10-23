@@ -1,12 +1,12 @@
 from django.shortcuts import get_object_or_404
-from django.views.generic import View, DetailView, ListView
+from django.views.generic import DetailView, ListView
 from .api import ProjectResource
 from .models import Deployment, Project
 
 
-class DeployerView(View):
+class DeployerMixin(object):
     def get_context_data(self, **kwargs):
-        data = super(DeployerView, self).get_context_data(**kwargs)
+        data = super(DeployerMixin, self).get_context_data(**kwargs)
         res = ProjectResource()
         objects = self.get_queryset()
         bundles = []
@@ -20,7 +20,7 @@ class DeployerView(View):
         return data
 
 
-class DeployerListView(DeployerView, ListView):
+class DeployerListView(DeployerMixin, ListView):
     template_name = 'deployment/deployer_list.html'
 
     def get_queryset(self):
@@ -28,7 +28,7 @@ class DeployerListView(DeployerView, ListView):
         return qs
 
 
-class ProjectDeployerView(DeployerView, DetailView):
+class ProjectDeployerView(DeployerMixin, DetailView):
     template_name = 'deployment/deployer_detail.html'
 
     def get_queryset(self):

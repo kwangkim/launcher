@@ -6,6 +6,7 @@ import requests
 import time
 from urlparse import urlparse
 
+from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
@@ -13,17 +14,17 @@ from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils import timezone
 
+import intercom
 from customerio import CustomerIO
-from intercom import Event, Intercom, User
 from model_utils.fields import StatusField
 from model_utils import Choices
 from .tasks import deploy
 
 logger = logging.getLogger(__name__)
 
-Intercom.app_id = settings.INTERCOM_APP_ID
-Intercom.api_key = settings.INTERCOM_API_KEY
-Intercom.api_endpoint = 'https://api.intercom.io/'
+intercom.Intercom.app_id = settings.INTERCOM_APP_ID
+intercom.Intercom.api_key = settings.INTERCOM_API_KEY
+intercom.Intercom.api_endpoint = 'https://api.intercom.io/'
 
 
 class Project(models.Model):
@@ -71,6 +72,7 @@ class Deployment(models.Model):
     )
     project = models.ForeignKey(Project, related_name='deployments')
     url = models.CharField(max_length=600)
+    user = models.ForeignKey(User, blank=True, null=True, related_name="deployments")
     email = models.EmailField()
     deploy_id = models.CharField(max_length=100)
     remote_container_id = models.IntegerField(default=0)
@@ -94,10 +96,11 @@ class Deployment(models.Model):
             self.status = 'Deploying'
         super(Deployment, self).save(*args, **kwargs)
         if self.status == 'Deploying':
-            deploy.delay(self)
-            User.create(
-                email=self.email
-            )
+            pass
+            # deploy.delay(self)
+            # intercom.User.create(
+            #     email=self.email
+            # )
 
     def get_remaining_seconds(self):
         if self.expiration_time and self.expiration_time > timezone.now():
@@ -113,7 +116,7 @@ class Deployment(models.Model):
         return 0
     get_remaining_minutes.short_description = 'Minutes remaining'
 
-    def expiration_datetime(self):
+    def calculate_expiration_datetime(self):
         return self.launch_time + datetime.timedelta(minutes=self.project.trial_duration)
 
     def deploy(self):
@@ -209,7 +212,7 @@ class Deployment(models.Model):
             self.url = " ".join(app_urls)
             self.status = 'Completed'
             self.launch_time = timezone.now()
-            self.expiration_time = self.expiration_datetime()
+            self.expiration_time = self.calculate_expiration_datetime()
             instance[self.deploy_id].trigger('deployment_complete', {
                 'app_name': self.project.name,
                 'message': "Deployment complete!",
@@ -217,7 +220,7 @@ class Deployment(models.Model):
                 'username': self.project.default_username,
                 'password': self.project.default_password
             })
-            Event.create(
+            intercom.Event.create(
                 event_name="deployed_app",
                 email=self.email,
                 metadata={
