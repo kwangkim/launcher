@@ -1,3 +1,4 @@
+from allauth.account import views as allauth_views
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 from .api import ProjectResource
@@ -68,3 +69,18 @@ class DeploymentDetailView(DetailView):
             data['username'] = obj.project.default_username
             data['password'] = obj.project.default_password
         return data
+
+
+class ConfirmEmail(allauth_views.ConfirmEmailView):
+    def post(self, *args, **kwargs):
+        response = super(ConfirmEmail, self).post(*args, **kwargs)
+        email = self.object.email_address.email
+        self.extend_apps_trial(email)
+        return response
+
+    def extend_apps_trial(self, email):
+        # extend currently running apps when the user confirms his email address
+        apps = Deployment.objects.filter(status='Completed')
+        for app in apps:
+            app.expiration_time = app.calculate_expiration_datetime(email)
+            app.save()

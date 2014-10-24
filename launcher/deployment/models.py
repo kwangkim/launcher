@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+from allauth.account.models import EmailAddress
 import pusher
 import requests
 import time
@@ -41,7 +42,8 @@ class Project(models.Model):
     )
     env_vars = models.CharField(max_length=500, blank=True,
                                 help_text="Space separated environment variables, example: key1=val1 key2=val2")
-    trial_duration = models.IntegerField(default=60, help_text="Trial duration in minutes")
+    trial_duration = models.IntegerField(blank=True, null=True, help_text="Trial duration in minutes")
+    unconfirmed_trial_duration = models.IntegerField(blank=True, null=True, help_text="Trial duration in minutes")
     slug = models.SlugField(max_length=40, editable=True, blank=True, null=True)
     status = StatusField(default=STATUS.Inactive)
     default_username = models.CharField(max_length=30, blank=True)
@@ -96,11 +98,10 @@ class Deployment(models.Model):
             self.status = 'Deploying'
         super(Deployment, self).save(*args, **kwargs)
         if self.status == 'Deploying':
-            pass
-            # deploy.delay(self)
-            # intercom.User.create(
-            #     email=self.email
-            # )
+            deploy.delay(self)
+            intercom.User.create(
+                email=self.email
+            )
 
     def get_remaining_seconds(self):
         if self.expiration_time and self.expiration_time > timezone.now():
@@ -116,8 +117,14 @@ class Deployment(models.Model):
         return 0
     get_remaining_minutes.short_description = 'Minutes remaining'
 
-    def calculate_expiration_datetime(self):
-        return self.launch_time + datetime.timedelta(minutes=self.project.trial_duration)
+    def calculate_expiration_datetime(self, email):
+        unconfirmed_trial_duration = self.project.unconfirmed_trial_duration or settings.DEFAULT_UNCONFIRMED_TRIAL_DURATION
+        trial_duration = self.project.trial_duration or settings.DEFAULT_TRIAL_DURATION
+        if not EmailAddress.objects.filter(email=email, verified=True).exists():
+            expiration_datetime = self.launch_time + datetime.timedelta(minutes=unconfirmed_trial_duration)
+        else:
+            expiration_datetime = self.launch_time + datetime.timedelta(minutes=trial_duration)
+        return expiration_datetime
 
     def deploy(self):
         instance = self._get_pusher_instance()
@@ -212,7 +219,7 @@ class Deployment(models.Model):
             self.url = " ".join(app_urls)
             self.status = 'Completed'
             self.launch_time = timezone.now()
-            self.expiration_time = self.calculate_expiration_datetime()
+            self.expiration_time = self.calculate_expiration_datetime(self.email)
             instance[self.deploy_id].trigger('deployment_complete', {
                 'app_name': self.project.name,
                 'message': "Deployment complete!",
