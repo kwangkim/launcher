@@ -1,6 +1,7 @@
 import os
 from os.path import join, abspath, dirname
 from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import reverse_lazy
 
 
 def get_env_variable(var_name):
@@ -118,7 +119,6 @@ SECRET_KEY = get_env_variable('SECRET_KEY')
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -126,9 +126,14 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
+    "django.core.context_processors.request",
     "django.core.context_processors.static",
     "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages"
+    "django.contrib.messages.context_processors.messages",
+
+    # allauth specific context processors
+    "allauth.account.context_processors.account",
+    "allauth.socialaccount.context_processors.socialaccount",
 )
 
 MIDDLEWARE_CLASSES = (
@@ -154,12 +159,14 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    #'django.contrib.sites',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
 
     # Third-party apps
+    'allauth',
+    'allauth.account',
     'djangobower',
     'django_extensions',
     'kombu.transport.django',
@@ -290,6 +297,29 @@ PIPELINE_COMPILERS = (
 # npm install -g uglify-js
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.uglifyjs.UglifyJSCompressor'
 PIPELINE_UGLIFYJS_BINARY = '/usr/bin/env uglifyjs'
+
+# Allauth config
+AUTHENTICATION_BACKENDS = (
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+
+    # `allauth` specific authentication methods, such as login by e-mail
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/'
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/'
+EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/'
+EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/'
+ACCOUNT_USERNAME_REQUIRED = False
+LOGIN_ON_EMAIL_CONFIRMATION = False
+SIGNUP_PASSWORD_VERIFICATION = False
+
+# Trial settings
+DEFAULT_UNCONFIRMED_TRIAL_DURATION = 30
+DEFAULT_TRIAL_DURATION = 120
 
 # Celery config
 BROKER_URL = 'django://'

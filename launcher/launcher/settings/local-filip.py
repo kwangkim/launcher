@@ -3,7 +3,7 @@ from .local import *
 DEBUG = True
 
 # Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 EMAIL_HOST = 'mail.kset.org'
 EMAIL_HOST_USER = get_env_variable('EMAIL_HOST_USER')

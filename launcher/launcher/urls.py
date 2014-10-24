@@ -1,16 +1,18 @@
 from django.conf.urls import include, patterns, url
 from django.contrib import admin
-from deployment.views import DeployerListView, ProjectDeployerView, \
-	DeploymentDetailView, ProjectDeployerEmbedView
+from deployment import views as deployment_views
 from .api import v1_api
 
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    url(r"^accounts/confirm-email/(?P<key>\w+)/$", deployment_views.ConfirmEmail.as_view(),
+        name="account_confirm_email"),
     url(r'^api/', include(v1_api.urls)),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^embed/(?P<pk>[\d]+)/$', ProjectDeployerEmbedView.as_view(), name='project_embed'),
-    url(r'^deployment/(?P<deploy_id>[\w]+)/$', DeploymentDetailView.as_view(), name='deployment_detail'),
-    url(r'^(?P<slug>[\w-]+)/$', ProjectDeployerView.as_view(), name='landing_page'),
-    url(r'^$', DeployerListView.as_view(), name='main'),
+    url(r'^embed/(?P<pk>[\d]+)/$', deployment_views.ProjectDeployerEmbedView.as_view(), name='project_embed'),
+    url(r'^deployment/(?P<deploy_id>[\w]+)/$', deployment_views.DeploymentDetailView.as_view(), name='deployment_detail'),
+    url(r'^(?P<slug>[\w-]+)/$', deployment_views.ProjectDeployerView.as_view(), name='landing_page'),
+    (r'^accounts/', include('allauth.urls')),
+    url(r'^$', deployment_views.DeployerListView.as_view(), name='main'),
 )
