@@ -16,6 +16,7 @@ from django.template.defaultfilters import slugify
 from django.utils import timezone
 
 import intercom
+import redis
 from customerio import CustomerIO
 from model_utils.fields import StatusField
 from model_utils import Choices
@@ -159,12 +160,10 @@ class Deployment(models.Model):
             "memory": 128,
             "type": "service",
             "hostname": self.deploy_id,
-            "domain": settings.DEMO_APPS_CUSTOM_DOMAIN,
             "labels": ["dev"],
             "environment": env_vars,
             "bind_ports": ports
         }
-
         r = requests.post(
             "{0}/api/containers".format(settings.SHIPYARD_HOST),
             data=json.dumps(payload),
@@ -181,12 +180,20 @@ class Deployment(models.Model):
             })
             time.sleep(2)
             domains = []
-            domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+            public_ports = [port["port"] for port in response[0]["ports"]]
+            for hostname in self.project.hostnames:
+                domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+            else:
+                domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
             scheme = "https" if "443" in self.project.ports else "http"
             app_urls = []
-            for domain in domains:
+            r = redis.StrictRedis(host=settings.HIPACHE_REDIS_IP, port=settings.HIPACHE_REDIS_PORT, db=0)
+            for domain, port in zip(domains, public_ports):
                 app_url = "{0}://{1}".format(scheme, domain)
                 app_urls.append(app_url)
+                r.rpush("frontend:{0}".format(domain), self.deploy_id)
+                r.rpush("frontend:{0}".format(domain), "{0}://{1}:{2}".format(scheme, settings.SHIPYARD_HOST_IP, port))
+
             self.url = " ".join(app_urls)
             self.status = 'Completed'
             self.launch_time = timezone.now()
