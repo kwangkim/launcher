@@ -1,0 +1,6 @@
+---
+- hosts: docker
+  remote_user: "{{remote_user}}"
+  gather_facts: false
+  roles:
+    - docker
