@@ -1,0 +1,2 @@
+remote_user: vagrant
+pull_docker_images: true

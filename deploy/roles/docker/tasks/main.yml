@@ -2,11 +2,11 @@
 
 - name: Check if APT can use HTTPS
   stat: path=/usr/lib/apt/methods/https
-  register: apt-https-enabled
+  register: https_support
 
 - name: Enable HTTPS links for APT
   apt: name=apt-transport-https state=present update_cache=yes
-  when: not apt-https-enabled
+  when: not https_support.stat.exists
 
 - name: Add Docker APT repository key
   apt_key: keyserver=keyserver.ubuntu.com id=36A1D7869245C8950F966E92D8576A8BA88D21E9 state=present
@@ -15,6 +15,12 @@
   apt_repository: repo='deb https://get.docker.com/ubuntu docker main' state=present update_cache=yes
 
 - name: Install Docker
-  apt: name=lxc-docker state=present upgrade=yes
+  apt: name=lxc-docker state=latest
   notify:
     - restart docker
+
+- name: Install python Docker client
+  pip: name=docker-py state=latest
+
+- include: images.yml
+  when: pull_docker_images is defined

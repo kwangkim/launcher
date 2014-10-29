@@ -6,6 +6,7 @@
     - secret_vars.yml
   roles:
     - common
+    - docker
     - pythondev
     - postgresql
     - memcached
