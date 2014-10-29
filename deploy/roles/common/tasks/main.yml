@@ -21,3 +21,13 @@
 
 - name: Generate locales
   command: locale-gen hr_HR.UTF-8
+
+- name: Ensure Python development tools are available
+  apt: pkg={{item}} state=latest
+  with_items:
+    - python-dev
+    - python-setuptools
+    - python-pycurl
+
+- name: Install pip
+  easy_install: name=pip

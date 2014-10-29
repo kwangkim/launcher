@@ -3,4 +3,5 @@
   remote_user: "{{remote_user}}"
   gather_facts: false
   roles:
+    - common
     - docker
