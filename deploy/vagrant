@@ -1,6 +1,12 @@
-[server]
+[launcher]
 192.168.33.10
 
-[server:vars]
+[launcher:vars]
 remote_user=vagrant
 sendfile=off
+
+[docker]
+192.168.33.20
+
+[docker:vars]
+remote_user=vagrant
