@@ -324,6 +324,10 @@ DEFAULT_TRIAL_DURATION = 120
 # Celery config
 BROKER_URL = 'django://'
 CELERYD_HIJACK_ROOT_LOGGER = False
+CELERY_RESULT_BACKEND = None
+CELERY_IGNORE_RESULT = True
+CELERY_DEFAULT_QUEUE = 'celery'
+CELERY_CREATE_MISSING_QUEUES = True
 
 # Pusher settings
 PUSHER_APP_ID = get_env_variable('PUSHER_APP_ID')
@@ -342,5 +346,10 @@ INTERCOM_EDX_APP_SECRET = get_env_variable('INTERCOM_EDX_APP_SECRET')
 
 # Docker settings
 SHIPYARD_HOST = get_env_variable('SHIPYARD_HOST')
-SHIPYARD_USER = get_env_variable('SHIPYARD_USER')
+SHIPYARD_HOST_IP = get_env_variable('SHIPYARD_HOST_IP')
 SHIPYARD_KEY = get_env_variable('SHIPYARD_KEY')
+HIPACHE_REDIS_IP = get_env_variable('HIPACHE_REDIS_IP')
+HIPACHE_REDIS_PORT = get_env_variable('HIPACHE_REDIS_PORT')
+
+# Domain from where demo apps are served, example: demo.appsembler.com
+DEMO_APPS_CUSTOM_DOMAIN = get_env_variable('DEMO_APPS_CUSTOM_DOMAIN')

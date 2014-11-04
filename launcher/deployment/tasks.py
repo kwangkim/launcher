@@ -21,7 +21,7 @@ logger = get_task_logger(__name__)
 
 @app.task
 def deploy(deploy_instance):
-    logger.info("Deploying {0.project.name}: {0.deploy_id} for {0.email}".format(deploy_instance))
+    logger.info("Deploying | {0.project.name}: {0.deploy_id} for {0.email}".format(deploy_instance))
     deploy_instance.deploy()
 
 
@@ -33,26 +33,19 @@ def destroy_expired_apps():
                                         status='Completed')
     if expired:
         for app in expired:
+            logger.info("Deleting expired app | {0.project.name}: {0.deploy_id} for {0.email}".format(app))
             app.status = 'Expired'
             app.save()
+            headers = {
+                'X-Service-Key': settings.SHIPYARD_KEY
+            }
             r = requests.delete(
-                "{0}/api/v1/containers/{1}/?username={2}&api_key={3}".format(
+                "{0}/api/containers/{1}".format(
                     settings.SHIPYARD_HOST,
                     app.remote_container_id,
-                    settings.SHIPYARD_USER,
-                    settings.SHIPYARD_KEY
                 ),
+                headers=headers
             )
-            for app_id in app.remote_app_id.split(" "):
-                r = requests.delete(
-                    "{0}/api/v1/applications/{1}/?username={2}&api_key={3}".format(
-                        settings.SHIPYARD_HOST,
-                        app_id,
-                        settings.SHIPYARD_USER,
-                        settings.SHIPYARD_KEY
-                    ),
-                )
-
 
 @app.task
 def app_expiring_soon_reminder():
@@ -66,6 +59,7 @@ def app_expiring_soon_reminder():
                                               reminder_mail_sent=False)
 
     for app in expiring_soon:
+        logger.info("Expiration notification | {0.project.name}: {0.deploy_id} for {0.email}".format(app))
         app.send_reminder_email()
         app.reminder_mail_sent = True
         app.save()
