@@ -1,0 +1,20 @@
+---
+
+- name: Pull the required Shipyard images
+  docker_pull: repo={{item}} tag=latest
+  with_items:
+    - shipyard/rethinkdb
+    - shipyard/shipyard
+    - shipyard/shipyard-cli
+
+- name: Start RethinkDB data container
+  docker: image=shipyard/rethinkdb volumes=/var/lib/redis name=shipyard-rethinkdb-data stdin_open=yes tty=yes command="/bin/bash -l"
+
+- name: Start RethinkDB
+  docker: image=shipyard/rethinkdb volumes_from=shipyard-rethinkdb-data name=shipyard-rethinkdb stdin_open=yes tty=yes
+
+- name: Start Shipyard
+  docker: image=shipyard/shipyard name=shipyard links=shipyard-rethinkdb:rethinkdb ports=8080:8080 stdin_open=yes tty=yes
+
+- name: Add Docker engine to Shipyard
+  docker: image=shipyard/shipyard-cli stdin_open=yes tty=yes command="shipyard add-engine --id docker --add http://192.168.33.20:2375 --cpus 1.0 --memory 1024 --label docker"

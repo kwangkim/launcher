@@ -1,2 +1,3 @@
+app_url: launcher.local.dev
 remote_user: vagrant
-sendfile: off
+sendfile: 'off'

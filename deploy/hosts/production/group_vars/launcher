@@ -1,2 +1,3 @@
+app_url: launcher.appsembler.com
 remote_user: root
-sendfile: on
+sendfile: 'on'
