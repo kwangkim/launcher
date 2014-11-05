@@ -11,10 +11,33 @@
   docker: image=shipyard/rethinkdb volumes=/var/lib/redis name=shipyard-rethinkdb-data stdin_open=yes tty=yes command="/bin/bash -l"
 
 - name: Start RethinkDB
-  docker: image=shipyard/rethinkdb volumes_from=shipyard-rethinkdb-data name=shipyard-rethinkdb stdin_open=yes tty=yes
+  docker: image=shipyard/rethinkdb volumes_from=shipyard-rethinkdb-data name=shipyard-rethinkdb stdin_open=yes tty=yes ports=8001:8080
+  register: rethinkdb
+
+- name: Wait for RethinkDB to start
+  wait_for: port=28015 host={{rethinkdb['ansible_facts']['docker_containers'][0]['NetworkSettings']['IPAddress']}} delay=2
+  with_items: docker_containers
+
+- name: Install RethinkDB CLI
+  npm: name=recli global=yes state=latest
+
+- name: Clear Shipyard service keys table
+  command: >
+    recli -h {{rethinkdb['ansible_facts']['docker_containers'][0]["NetworkSettings"]["IPAddress"]}} 'r.db("shipyard").table("service_keys").delete()'
+
+- name: Insert Shipyard service key
+  command: >
+    recli -h {{rethinkdb['ansible_facts']['docker_containers'][0]["NetworkSettings"]["IPAddress"]}} 'r.db("shipyard").table("service_keys").insert({description: "{{app_name}}", key: "{{shipyard_key}}"})'
+
+- name: Clear Shipyard engines table
+  command: >
+    recli -h {{rethinkdb['ansible_facts']['docker_containers'][0]["NetworkSettings"]["IPAddress"]}} 'r.db("shipyard").table("config").delete()'
+
+- name: Insert Shipyard engine
+  command: >
+    recli -h {{rethinkdb['ansible_facts']['docker_containers'][0]["NetworkSettings"]["IPAddress"]}}
+     'r.db("shipyard").table("config").insert({engine: {Addr: "http://{{item}}:2375", Cpus: 1, ID: "docker", Labels: ["dev"], Memory: 1024}})'
+  with_items: groups['docker']
 
 - name: Start Shipyard
   docker: image=shipyard/shipyard name=shipyard links=shipyard-rethinkdb:rethinkdb ports=8080:8080 stdin_open=yes tty=yes
-
-- name: Add Docker engine to Shipyard
-  docker: image=shipyard/shipyard-cli stdin_open=yes tty=yes command="shipyard add-engine --id docker --add http://192.168.33.20:2375 --cpus 1.0 --memory 1024 --label docker"

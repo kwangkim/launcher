@@ -10,11 +10,10 @@
   docker: image=tutum/hipache volumes_from=hipache-data name=hipache ports=80:80,127.0.0.1:63790:6379
 
 - name: Wait for hipache redis port
-  wait_for: host=127.0.0.1 port=63790 delay=3
+  wait_for: host=127.0.0.1 port={{hipache_redis_port}} delay=3
 
 - name: Delete old Launcher DNS entry in hipache
   command: redis-cli -p 63790 del frontend:{{app_url}}
 
 - name: Insert Launcher DNS entry in hipache
   command: redis-cli -p 63790 rpush frontend:{{app_url}} launcher http://{{ansible_default_ipv4['address']}}:8000
-
