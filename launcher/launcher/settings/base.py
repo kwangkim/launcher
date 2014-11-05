@@ -22,7 +22,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Nate Aune', 'nate@appsembler.com'),
+    #('Nate Aune', 'nate@appsembler.com'),
     ('Filip Jukic', 'filip@appsembler.com'),
 )
 
