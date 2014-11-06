@@ -180,6 +180,8 @@ class Deployment(models.Model):
             })
             time.sleep(2)
             domains = []
+            docker_server = urlparse(response[0]['engine']['addr'])
+            docker_server_ip = docker_server.hostname
             public_ports = [port["port"] for port in response[0]["ports"]]
             for hostname in self.project.hostnames:
                 domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
@@ -192,7 +194,7 @@ class Deployment(models.Model):
                 app_url = "{0}://{1}".format(scheme, domain)
                 app_urls.append(app_url)
                 r.rpush("frontend:{0}".format(domain), self.deploy_id)
-                r.rpush("frontend:{0}".format(domain), "{0}://{1}:{2}".format(scheme, settings.SHIPYARD_HOST_IP, port))
+                r.rpush("frontend:{0}".format(domain), "{0}://{1}:{2}".format(scheme, docker_server_ip, port))
 
             self.url = " ".join(app_urls)
             self.status = 'Completed'

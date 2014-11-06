@@ -347,7 +347,6 @@ INTERCOM_EDX_APP_SECRET = get_env_variable('INTERCOM_EDX_APP_SECRET')
 
 # Docker settings
 SHIPYARD_HOST = get_env_variable('SHIPYARD_HOST')
-SHIPYARD_HOST_IP = get_env_variable('SHIPYARD_HOST_IP')
 SHIPYARD_KEY = get_env_variable('SHIPYARD_KEY')
 HIPACHE_REDIS_IP = get_env_variable('HIPACHE_REDIS_IP')
 HIPACHE_REDIS_PORT = get_env_variable('HIPACHE_REDIS_PORT')
