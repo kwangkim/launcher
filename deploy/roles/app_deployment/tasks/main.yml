@@ -7,11 +7,11 @@
   tags: code
 
 - name: Clear pip build dir
-  file: path=/opt/venv/build state=absent
+  file: path={{venv_dir}}/build state=absent
   tags: code
 
 - name: Create a virtual env and install app requirements
-  pip: requirements='requirements/production.txt' virtualenv=/opt/venv chdir={{git_repo_dir}}
+  pip: requirements='requirements/production.txt' virtualenv={{venv_dir}} chdir={{git_repo_dir}}
   tags: code
 
 - name: Install bower components

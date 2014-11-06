@@ -10,7 +10,7 @@
     - virtualenvwrapper
 
 - name: Set up virtualenvwrapper
-  lineinfile: dest=/root/.bashrc line="{{item}}" state=present
+  lineinfile: dest=/root/.zshrc line="{{item}}" state=present
   with_items:
     - "export WORKON_HOME='/opt/venv/'"
     - "export PROJECT_HOME='/opt/'"

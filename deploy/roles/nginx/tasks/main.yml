@@ -12,6 +12,15 @@
 - name: Install nginx
   apt: pkg=nginx state=latest
 
+- name: Check if Launcher config is already there
+  stat: path=/etc/nginx/sites-available/{{app_name}}.conf
+  register: nginx_launcher_conf
+
+# needed so nginx doesn't take the port 80 by default
+- name: Stop nginx if Launcher config is not installed
+  service: name=nginx state=stopped
+  when: not nginx_launcher_conf.stat.exists
+
 - name: Ensure main Nginx configuration file is up to date
   template: src=nginx.conf dest=/etc/nginx/nginx.conf
 
