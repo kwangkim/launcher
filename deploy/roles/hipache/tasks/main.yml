@@ -7,10 +7,13 @@
   docker: image=tutum/hipache volumes=/var/lib/redis name=hipache-data stdin_open=yes tty=yes command="/bin/bash -l"
 
 - name: Start hipache
-  docker: image=tutum/hipache volumes_from=hipache-data name=hipache ports=80:80,127.0.0.1:63790:6379
+  docker: image=tutum/hipache volumes_from=hipache-data name=hipache ports=80:80,127.0.0.1:63790:6379 env="SERVER_WORKERS=4"
 
 - name: Wait for hipache redis port
   wait_for: host=127.0.0.1 port={{hipache_redis_port}} delay=3
+
+- name: Copy Hipache Upstart script
+  copy: src=upstart_hipache.conf dest=/etc/init/docker_hipache.conf mode=0644
 
 - name: Delete old Launcher DNS entry in hipache
   command: redis-cli -p 63790 del frontend:{{app_url}}

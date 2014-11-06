@@ -7,7 +7,7 @@ app_name: launcher
 git_repo_url: https://github.com/appsembler/launcher.git
 git_repo_branch: master
 git_repo_dir: /opt/launcher
-venv_dir: /opt/venv
+venv_dir: /opt/venv/launcher
 
 # memcached config
 memcached_memory: 16

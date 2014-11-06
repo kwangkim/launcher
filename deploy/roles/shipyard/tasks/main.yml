@@ -8,7 +8,7 @@
     - shipyard/shipyard-cli
 
 - name: Start RethinkDB data container
-  docker: image=shipyard/rethinkdb volumes=/var/lib/redis name=shipyard-rethinkdb-data stdin_open=yes tty=yes command="/bin/bash -l"
+  docker: image=shipyard/rethinkdb name=shipyard-rethinkdb-data stdin_open=yes tty=yes command="/bin/bash -l"
 
 - name: Start RethinkDB
   docker: image=shipyard/rethinkdb volumes_from=shipyard-rethinkdb-data name=shipyard-rethinkdb stdin_open=yes tty=yes ports=8001:8080
@@ -16,10 +16,21 @@
 
 - name: Wait for RethinkDB to start
   wait_for: port=28015 host={{rethinkdb['ansible_facts']['docker_containers'][0]['NetworkSettings']['IPAddress']}} delay=2
-  with_items: docker_containers
+
+- name: Copy RethinkDB Upstart script
+  copy: src=upstart_rethinkdb.conf dest=/etc/init/docker_rethinkdb.conf mode=0644
 
 - name: Install RethinkDB CLI
   npm: name=recli global=yes state=latest
+
+- name: Start Shipyard
+  docker: image=shipyard/shipyard name=shipyard links=shipyard-rethinkdb:rethinkdb ports=8080:8080 stdin_open=yes tty=yes
+
+- name: Wait a bit until Shipyard creates the required tables
+  pause: seconds=5
+
+- name: Copy Shipyard Upstart script
+  copy: src=upstart_shipyard.conf dest=/etc/init/docker_shipyard.conf mode=0644
 
 - name: Clear Shipyard service keys table
   command: >
@@ -39,5 +50,6 @@
      'r.db("shipyard").table("config").insert({engine: {Addr: "http://{{item}}:2375", Cpus: 1, ID: "docker", Labels: ["dev"], Memory: 1024}})'
   with_items: groups['docker']
 
-- name: Start Shipyard
-  docker: image=shipyard/shipyard name=shipyard links=shipyard-rethinkdb:rethinkdb ports=8080:8080 stdin_open=yes tty=yes
+# needed for Shipyard to pick up changes made in RethinkDB
+- name: Restart Shipyard
+  docker: image=shipyard/shipyard name=shipyard state=restarted

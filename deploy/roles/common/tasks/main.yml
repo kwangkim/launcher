@@ -4,7 +4,7 @@
   apt: update_cache=yes cache_valid_time=3600
 
 - name: Install common packages
-  apt: pkg={{item}} state=present
+  apt: pkg={{item}} state=latest
   with_items:
     - vim
     - git-core
@@ -14,6 +14,7 @@
     - libxslt1-dev
     - htop
     - iotop
+    - linux-image-extra-virtual
     - python-software-properties
     - python
     - g++
@@ -31,3 +32,12 @@
 
 - name: Install pip
   easy_install: name=pip
+
+- name: Install ZSH
+  apt: pkg=zsh state=latest
+
+- name: Install oh-my-zsh
+  shell: curl -L http://install.ohmyz.sh | /usr/bin/zsh
+
+- name: Copy .zshrc config
+  copy: src=zshrc dest=/root/.zshrc

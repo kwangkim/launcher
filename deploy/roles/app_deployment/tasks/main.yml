@@ -67,3 +67,6 @@
     #- sample_projects.json
   environment: django_env_vars
   tags: code
+
+- name: Set up virtualenv postactivate scripts
+  template: src=postactivate dest={{venv_dir}}/bin/postactivate mode=0700

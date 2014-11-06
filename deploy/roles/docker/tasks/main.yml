@@ -19,6 +19,11 @@
   notify:
     - restart docker
 
+- name: Copy Docker config file
+  copy: src={{server}}_docker.conf dest=/etc/default/docker
+  notify:
+    - restart docker
+
 - name: Install python Docker client
   pip: name=docker-py state=latest
 
