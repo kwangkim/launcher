@@ -47,7 +47,7 @@ DATABASES = {
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = [
     '.appsembler.com',
-    '.local.dev',
+    '.dev',
     '162.243.216.108',
     '127.0.0.1',
     '192.168.33.10',
