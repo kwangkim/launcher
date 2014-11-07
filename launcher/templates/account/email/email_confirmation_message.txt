@@ -1,0 +1,14 @@
+{% load account %}{% user_display user as user_display %}{% load i18n %}{% autoescape off %}{% blocktrans with current_site.name as site_name %}
+
+Thanks for taking an application for a test-drive on Appsembler's Launcher!
+
+Would you like to extend your trial?
+
+All you need to do is click on the following link to confirm that this is a valid email address, and we'll give you more time to evaluate the application:
+
+{{ activate_url }}
+
+Let us know if you have any questions. We're here to help!
+
+- Appsembler Support Team
+{% endblocktrans %}{% endautoescape %}

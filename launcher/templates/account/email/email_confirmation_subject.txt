@@ -1,0 +1,4 @@
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans %}Appsembler Launcher: Confirm E-mail Address{% endblocktrans %}
+{% endautoescape %}
