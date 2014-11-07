@@ -1,4 +1,5 @@
 from allauth.account import views as allauth_views
+from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 from .api import ProjectResource
@@ -84,3 +85,6 @@ class ConfirmEmail(allauth_views.ConfirmEmailView):
         for app in apps:
             app.expiration_time = app.calculate_expiration_datetime(email)
             app.save()
+
+    def get_redirect_url(self):
+        return reverse('main')
