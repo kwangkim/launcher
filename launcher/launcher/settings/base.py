@@ -1,7 +1,7 @@
 import os
 from os.path import join, abspath, dirname
+from django.contrib.messages import constants as message_constants
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse_lazy
 
 
 def get_env_variable(var_name):
@@ -235,6 +235,8 @@ LOGGING = {
         },
     },
 }
+
+MESSAGE_LEVEL = message_constants.SUCCESS
 
 # Bower config
 BOWER_COMPONENTS_ROOT = root('components')
