@@ -1,4 +1,15 @@
 # Appsembler Launch
+
+## New instructions
+
+Install Vagrant and Virtualbox.
+
+	$ vagrant plugin install vagrant-dns
+	$ cd deploy
+	$ vagrant up
+	
+# Old instructions
+
 ## Local development set up
 
 This instructions are written under the assumption that you have [virtualenvwrapper](http://virtualenvwrapper.readthedocs.org/en/latest/) set up on your machine.
