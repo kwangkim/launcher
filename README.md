@@ -7,6 +7,8 @@ Install Vagrant and Virtualbox.
 	$ vagrant plugin install vagrant-dns
 	$ git clone --recursive git@github.com:appsembler/launcher.git
 	$ cd launcher/deploy
+	$ mkdir -p hosts/vagrant
+	$ cp secret_vars.yml.example hosts/vagrant/secret_vars.yml  (<-- edit this file with your settings)
 	$ vagrant up
 	
 If you forgot to use `--recursive` the first time you cloned the repository, you can pull the submodules (`docker_pull` in this case), using this command:
