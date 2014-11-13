@@ -5,9 +5,9 @@
 Install Vagrant and Virtualbox.
 
 	$ vagrant plugin install vagrant-dns
+	$ vagrant dns --install
 	$ git clone --recursive git@github.com:appsembler/launcher.git
 	$ cd launcher/deploy
-	$ mkdir -p hosts/vagrant
 	$ cp secret_vars.yml.example hosts/vagrant/secret_vars.yml  (<-- edit this file with your settings)
 	$ vagrant up
 	
