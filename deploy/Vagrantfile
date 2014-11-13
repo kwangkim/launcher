@@ -34,6 +34,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         ansible.inventory_path = "hosts/vagrant/inventory"
         ansible.sudo = true
         #ansible.tags = ['hipache', 'shipyard']
+        ansible.tags = ['ssh']
     end
   end
 

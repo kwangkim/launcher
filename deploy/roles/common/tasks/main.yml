@@ -20,8 +20,9 @@
     - g++
     - make
 
-- name: Generate locales
-  command: locale-gen hr_HR.UTF-8
+- name: Do not pass locales over SSH
+  lineinfile: dest=/etc/ssh/sshd_config line="AcceptEnv LANG LC_*" state=absent
+  tags: ssh
 
 - name: Ensure Python development tools are available
   apt: pkg={{item}} state=latest
