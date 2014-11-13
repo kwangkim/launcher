@@ -16,13 +16,12 @@
 
 - name: Install Docker
   apt: name=lxc-docker state=latest
-  notify:
-    - restart docker
 
 - name: Copy Docker config file
   copy: src={{server}}_docker.conf dest=/etc/default/docker
-  notify:
-    - restart docker
+
+- name: Restart Docker
+  service: name=docker state=restarted
 
 - name: Install python Docker client
   pip: name=docker-py state=latest
