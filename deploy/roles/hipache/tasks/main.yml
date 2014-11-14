@@ -22,4 +22,4 @@
   command: redis-cli -p 63790 rpush frontend:{{app_url}} launcher http://{{ansible_default_ipv4['address']}}:8000
 
 - name: Insert Shipyard DNS entry in hipache
-  command: redis-cli -p 63790 rpush frontend:{{app_url}} launcher http://{{ansible_default_ipv4['address']}}:8080
+  command: redis-cli -p 63790 rpush frontend:{{shipyard_url}} launcher http://{{ansible_default_ipv4['address']}}:8080
