@@ -1,4 +1,5 @@
 app_url: launcher.test.jukic.me
+shipyard_url: shipyard.test.jukic.me
 remote_user: root
 server: launcher
 sendfile: 'off'

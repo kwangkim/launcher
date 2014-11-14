@@ -1,4 +1,5 @@
 app_url: launcher.dev
+shipyard_url: shipyard.dev
 remote_user: vagrant
 server: launcher
 sendfile: 'off'

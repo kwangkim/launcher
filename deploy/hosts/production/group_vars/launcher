@@ -1,4 +1,5 @@
 app_url: launcher.appsembler.com
+shipyard_url: shipyard.appsembler.com
 remote_user: root
 sendfile: 'on'
 
