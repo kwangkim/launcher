@@ -1,7 +1,7 @@
 ---
 
 - name: start docker
-  action: service name=docker state=started
+  service: name=docker state=started
 
 - name: restart docker
-  action: service name=docker state=restarted
+  service: name=docker state=restarted

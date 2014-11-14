@@ -6,7 +6,7 @@
   apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main' state=present update_cache=yes
 
 - name: Install PostgreSQL
-  apt: pkg={{item}} state=latest
+  apt: name={{item}} state=latest
   with_items:
     - postgresql-9.3
     - libpq-dev
@@ -35,7 +35,7 @@
                  template='template0'
 
 #- name: Install S3 command line tools
-#  apt: pkg=s3cmd state=latest
+#  apt: name=s3cmd state=latest
 #
 #- name: Copy s3cmd config file
 #  template: src=s3cfg dest=/etc/s3cfg

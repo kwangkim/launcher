@@ -4,7 +4,7 @@
   apt: update_cache=yes cache_valid_time=3600
 
 - name: Install common packages
-  apt: pkg={{item}} state=latest
+  apt: name={{item}} state=latest
   with_items:
     - vim
     - git-core
@@ -25,7 +25,7 @@
   tags: ssh
 
 - name: Ensure Python development tools are available
-  apt: pkg={{item}} state=latest
+  apt: name={{item}} state=latest
   with_items:
     - python-dev
     - python-setuptools
@@ -35,7 +35,7 @@
   easy_install: name=pip
 
 - name: Install ZSH
-  apt: pkg=zsh state=latest
+  apt: name=zsh state=latest
 
 - name: Install oh-my-zsh
   shell: curl -L http://install.ohmyz.sh | /usr/bin/zsh

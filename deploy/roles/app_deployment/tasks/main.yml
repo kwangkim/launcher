@@ -14,6 +14,16 @@
   pip: requirements='requirements/production.txt' virtualenv={{venv_dir}} chdir={{git_repo_dir}}
   tags: code
 
+- name: Check Django installation
+  django_manage: >
+      command="check"
+      app_path={{django_project_dir}}
+      settings=launcher.settings.production
+      pythonpath={{django_project_dir}}
+      virtualenv={{venv_dir}}
+  environment: django_env_vars
+  tags: code
+
 - name: Install bower components
   django_manage: >
       command="bower_install -- --allow-root -f"

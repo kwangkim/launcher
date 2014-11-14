@@ -10,7 +10,7 @@
     - deb-src http://nginx.org/packages/ubuntu/ precise nginx
 
 - name: Install nginx
-  apt: pkg=nginx state=latest
+  apt: name=nginx state=latest
 
 - name: Check if Launcher config is already there
   stat: path=/etc/nginx/sites-available/{{app_name}}.conf

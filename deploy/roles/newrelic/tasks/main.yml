@@ -19,7 +19,7 @@
   apt_repository: repo='deb http://apt.newrelic.com/debian/ newrelic non-free' state=present update_cache=yes
 
 - name: Install New Relic server library
-  apt: pkg=newrelic-sysmond state=latest
+  apt: name=newrelic-sysmond state=latest
   when: environment != "vagrant"
 
 - name: Set New Relic license key
