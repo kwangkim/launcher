@@ -159,6 +159,7 @@ class Deployment(models.Model):
             "cpus": 0.1,
             "memory": 128,
             "type": "service",
+            "container_name": self.deploy_id,
             "hostname": self.deploy_id,
             "labels": ["dev"],
             "environment": env_vars,
