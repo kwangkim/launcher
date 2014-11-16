@@ -100,9 +100,12 @@ class Deployment(models.Model):
         super(Deployment, self).save(*args, **kwargs)
         if self.status == 'Deploying':
             deploy.delay(self)
-            intercom.User.create(
-                email=self.email
-            )
+            try:
+                intercom.User.create(
+                    email=self.email
+                )
+            except:
+                pass
 
     def get_remaining_seconds(self):
         if self.expiration_time and self.expiration_time > timezone.now():
@@ -208,15 +211,18 @@ class Deployment(models.Model):
                 'username': self.project.default_username,
                 'password': self.project.default_password
             })
-            intercom.Event.create(
-                event_name="deployed_app",
-                email=self.email,
-                metadata={
-                    'app_name': self.project.name,
-                    'app_url': self.url,
-                    'deploy_id': self.deploy_id,
-                }
-            )
+            try:
+                intercom.Event.create(
+                    event_name="deployed_app",
+                    email=self.email,
+                    metadata={
+                        'app_name': self.project.name,
+                        'app_url': self.url,
+                        'deploy_id': self.deploy_id,
+                    }
+                )
+            except:
+                pass
             if self.email:
                 cio.track(customer_id=self.email,
                           name='app_deploy_complete',
