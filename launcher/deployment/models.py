@@ -184,7 +184,7 @@ class Deployment(models.Model):
             docker_server = urlparse(response[0]['engine']['addr'])
             docker_server_ip = docker_server.hostname
             public_ports = [port["port"] for port in response[0]["ports"]]
-            for hostname in self.project.hostnames:
+            for hostname in self.project.hostnames.split(" "):
                 domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
             else:
                 domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
