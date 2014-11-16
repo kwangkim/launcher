@@ -100,9 +100,12 @@ class Deployment(models.Model):
         super(Deployment, self).save(*args, **kwargs)
         if self.status == 'Deploying':
             deploy.delay(self)
-            intercom.User.create(
-                email=self.email
-            )
+            try:
+                intercom.User.create(
+                    email=self.email
+                )
+            except:
+                pass
 
     def get_remaining_seconds(self):
         if self.expiration_time and self.expiration_time > timezone.now():
@@ -148,7 +151,7 @@ class Deployment(models.Model):
         ports = [{"proto": "tcp", "container_port": int(port)} for port in ports]
         if "edx" in self.project.name.lower():
             env_vars["EDX_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["EDX_PREVIEW_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars["EDX_PREVIEW_LMS_BASE"] = "preview.lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
             env_vars["EDX_CMS_BASE"] = "cms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
             env_vars["INTERCOM_APP_ID"] = "{0}".format(settings.INTERCOM_EDX_APP_ID)
             env_vars["INTERCOM_APP_SECRET"] = "{0}".format(settings.INTERCOM_EDX_APP_SECRET)
@@ -184,7 +187,7 @@ class Deployment(models.Model):
             docker_server = urlparse(response[0]['engine']['addr'])
             docker_server_ip = docker_server.hostname
             public_ports = [port["port"] for port in response[0]["ports"]]
-            for hostname in self.project.hostnames:
+            for hostname in self.project.hostnames.split(" "):
                 domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
             else:
                 domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
@@ -208,15 +211,18 @@ class Deployment(models.Model):
                 'username': self.project.default_username,
                 'password': self.project.default_password
             })
-            intercom.Event.create(
-                event_name="deployed_app",
-                email=self.email,
-                metadata={
-                    'app_name': self.project.name,
-                    'app_url': self.url,
-                    'deploy_id': self.deploy_id,
-                }
-            )
+            try:
+                intercom.Event.create(
+                    event_name="deployed_app",
+                    email=self.email,
+                    metadata={
+                        'app_name': self.project.name,
+                        'app_url': self.url,
+                        'deploy_id': self.deploy_id,
+                    }
+                )
+            except:
+                pass
             if self.email:
                 cio.track(customer_id=self.email,
                           name='app_deploy_complete',
