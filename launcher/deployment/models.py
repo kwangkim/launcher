@@ -148,7 +148,7 @@ class Deployment(models.Model):
         ports = [{"proto": "tcp", "container_port": int(port)} for port in ports]
         if "edx" in self.project.name.lower():
             env_vars["EDX_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["EDX_PREVIEW_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars["EDX_PREVIEW_LMS_BASE"] = "preview.lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
             env_vars["EDX_CMS_BASE"] = "cms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
             env_vars["INTERCOM_APP_ID"] = "{0}".format(settings.INTERCOM_EDX_APP_ID)
             env_vars["INTERCOM_APP_SECRET"] = "{0}".format(settings.INTERCOM_EDX_APP_SECRET)
