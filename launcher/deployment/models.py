@@ -148,7 +148,7 @@ class Deployment(models.Model):
             env_vars = dict(item.split("=") for item in self.project.env_vars.split(" "))
         else:
             env_vars = {}
-        ports = [{"proto": "tcp", "container_port": int(port)} for port in ports]
+        bind_ports = [{"proto": "tcp", "container_port": int(port)} for port in ports]
         if "edx" in self.project.name.lower():
             env_vars["EDX_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
             env_vars["EDX_PREVIEW_LMS_BASE"] = "preview.lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
@@ -166,7 +166,7 @@ class Deployment(models.Model):
             "hostname": self.deploy_id,
             "labels": ["dev"],
             "environment": env_vars,
-            "bind_ports": ports
+            "bind_ports": bind_ports
         }
         r = requests.post(
             "{0}/api/containers".format(settings.SHIPYARD_HOST),
@@ -186,19 +186,23 @@ class Deployment(models.Model):
             domains = []
             docker_server = urlparse(response[0]['engine']['addr'])
             docker_server_ip = docker_server.hostname
-            public_ports = [port["port"] for port in response[0]["ports"]]
             for hostname in self.project.hostnames.split(" "):
                 domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
             else:
                 domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+            # maps internal container ports to domains
+            port_domain_mapping = {int(port): domain for port, domain in zip(ports, domains)}
+            # maps internal container ports to public ports (for example: 80 -> 49302)
+            public_container_port_mapping = {port["container_port"]: port["port"] for port in response[0]["ports"]}
             scheme = "https" if "443" in self.project.ports else "http"
             app_urls = []
             r = redis.StrictRedis(host=settings.HIPACHE_REDIS_IP, port=settings.HIPACHE_REDIS_PORT, db=0)
-            for domain, port in zip(domains, public_ports):
+            for internal_port, public_port in public_container_port_mapping.items():
+                domain = port_domain_mapping[internal_port]
                 app_url = "{0}://{1}".format(scheme, domain)
                 app_urls.append(app_url)
                 r.rpush("frontend:{0}".format(domain), self.deploy_id)
-                r.rpush("frontend:{0}".format(domain), "{0}://{1}:{2}".format(scheme, docker_server_ip, port))
+                r.rpush("frontend:{0}".format(domain), "{0}://{1}:{2}".format(scheme, docker_server_ip, public_port))
 
             self.url = " ".join(app_urls)
             self.status = 'Completed'
