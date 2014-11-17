@@ -177,8 +177,8 @@ class Deployment(models.Model):
 
         payload = {
             "name": self.project.image_name,
-            "cpus": 0.1,
-            "memory": 128,
+            "cpus": 0.8,
+            "memory": 2048,
             "type": "service",
             "container_name": self.deploy_id,
             "hostname": self.deploy_id,
