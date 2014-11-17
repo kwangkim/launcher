@@ -282,7 +282,7 @@ class Deployment(models.Model):
                 customer_id=self.email,
                 name='app_expiring_soon',
                 app_name=self.project.name,
-                app_url=self.url.replace(" ", "\n"),
+                app_url=self.url,
                 status_url="http://launcher.appsembler.com" + reverse(
                     'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
                 remaining_minutes=self.get_remaining_minutes(),
