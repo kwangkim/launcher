@@ -161,7 +161,7 @@ class Deployment(models.Model):
 
         payload = {
             "name": self.project.image_name,
-            "cpus": str(self.project.number_of_cpus or settings.DEFAULT_NUMBER_OF_CPUS),
+            "cpus": float(self.project.number_of_cpus or settings.DEFAULT_NUMBER_OF_CPUS),
             "memory": self.project.amount_of_ram or settings.DEFAULT_AMOUNT_OF_RAM,
             "type": "service",
             "container_name": self.deploy_id,
