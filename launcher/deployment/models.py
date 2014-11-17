@@ -205,9 +205,10 @@ class Deployment(models.Model):
             docker_server = urlparse(response[0]['engine']['addr'])
             docker_server_ip = docker_server.hostname
             for hostname in self.project.hostnames.split(" "):
-                domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
-            else:
-                domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+                if hostname:
+                    domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+                else:
+                    domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
             # maps internal container ports to domains
             port_domain_mapping = {int(port): domain for port, domain in zip(ports, domains)}
             # maps internal container ports to public ports (for example: 80 -> 49302)
