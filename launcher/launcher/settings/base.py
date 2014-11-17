@@ -48,7 +48,7 @@ DATABASES = {
 ALLOWED_HOSTS = [
     '.appsembler.com',
     '.dev',
-    '162.243.216.108',
+    '.jukic.me',
     '127.0.0.1',
     '192.168.33.10',
 ]
