@@ -65,3 +65,7 @@ body {
 #appsembler-logo {
     margin: 0 auto 20px;
 }
+
+.iframe .embed-buttons-message {
+    display: none;
+}
