@@ -27,6 +27,9 @@
 - name: Delete old Launcher DNS entry in hipache
   command: redis-cli -p 63790 del frontend:{{app_url}}
 
+- name: Delete old Launcher DNS entry in hipache
+  command: redis-cli -p 63790 del frontend:{{shipyard_url}}
+
 - name: Insert Launcher DNS entry in hipache
   command: redis-cli -p 63790 rpush frontend:{{app_url}} launcher http://{{ansible_default_ipv4['address']}}:8000
 
