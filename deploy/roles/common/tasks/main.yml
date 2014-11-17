@@ -14,7 +14,7 @@
     - libxslt1-dev
     - htop
     - iotop
-    - linux-image-extra-virtual
+    - linux-image-extra-{{ansible_kernel}}
     - python-software-properties
     - python
     - g++
