@@ -29,7 +29,7 @@ class DeploymentResource(ModelResource):
 
     def obj_create(self, bundle, **kwargs):
         # create user if it doesn't exist already
-        email = bundle.data['email']
+        email = bundle.data['email'].strip().lower()
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
