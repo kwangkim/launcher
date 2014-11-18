@@ -1,4 +1,7 @@
 ---
 
 - name: Pull required docker images from registry
-  docker_pull: repo=appsembler/pinry state=present
+  docker_pull: repo={{item}} state=present
+  with_items:
+    - phusion/baseimage
+    - appsembler/pinry
