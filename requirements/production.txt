@@ -4,5 +4,4 @@ celery-with-redis==3.0
 flower==0.6.0
 newrelic==2.14.0.11
 pylibmc==1.2.3
-redis==2.9.1
 tornado==3.2

@@ -1,5 +1,6 @@
 import os
 from os.path import join, abspath, dirname
+from django.contrib.messages import constants as message_constants
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -21,7 +22,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Nate Aune', 'nate@appsembler.com'),
+    #('Nate Aune', 'nate@appsembler.com'),
     ('Filip Jukic', 'filip@appsembler.com'),
 )
 
@@ -46,7 +47,8 @@ DATABASES = {
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = [
     '.appsembler.com',
-    '162.243.216.108',
+    '.dev',
+    '.jukic.me',
     '127.0.0.1',
     '192.168.33.10',
 ]
@@ -118,7 +120,6 @@ SECRET_KEY = get_env_variable('SECRET_KEY')
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -126,9 +127,14 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
+    "django.core.context_processors.request",
     "django.core.context_processors.static",
     "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages"
+    "django.contrib.messages.context_processors.messages",
+
+    # allauth specific context processors
+    "allauth.account.context_processors.account",
+    "allauth.socialaccount.context_processors.socialaccount",
 )
 
 MIDDLEWARE_CLASSES = (
@@ -154,12 +160,14 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    #'django.contrib.sites',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
 
     # Third-party apps
+    'allauth',
+    'allauth.account',
     'djangobower',
     'django_extensions',
     'kombu.transport.django',
@@ -228,6 +236,8 @@ LOGGING = {
     },
 }
 
+MESSAGE_LEVEL = message_constants.SUCCESS
+
 # Bower config
 BOWER_COMPONENTS_ROOT = root('components')
 
@@ -291,9 +301,37 @@ PIPELINE_COMPILERS = (
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.uglifyjs.UglifyJSCompressor'
 PIPELINE_UGLIFYJS_BINARY = '/usr/bin/env uglifyjs'
 
+# Allauth config
+AUTHENTICATION_BACKENDS = (
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+
+    # `allauth` specific authentication methods, such as login by e-mail
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Launcher] "
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/'
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/'
+EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/'
+EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/'
+ACCOUNT_USERNAME_REQUIRED = False
+LOGIN_ON_EMAIL_CONFIRMATION = False
+SIGNUP_PASSWORD_VERIFICATION = False
+
+# Trial settings
+DEFAULT_UNCONFIRMED_TRIAL_DURATION = 30
+DEFAULT_TRIAL_DURATION = 120
+
 # Celery config
 BROKER_URL = 'django://'
 CELERYD_HIJACK_ROOT_LOGGER = False
+CELERY_RESULT_BACKEND = None
+CELERY_IGNORE_RESULT = True
+CELERY_DEFAULT_QUEUE = 'celery'
+CELERY_CREATE_MISSING_QUEUES = True
 
 # Pusher settings
 PUSHER_APP_ID = get_env_variable('PUSHER_APP_ID')
@@ -312,5 +350,13 @@ INTERCOM_EDX_APP_SECRET = get_env_variable('INTERCOM_EDX_APP_SECRET')
 
 # Docker settings
 SHIPYARD_HOST = get_env_variable('SHIPYARD_HOST')
-SHIPYARD_USER = get_env_variable('SHIPYARD_USER')
 SHIPYARD_KEY = get_env_variable('SHIPYARD_KEY')
+HIPACHE_REDIS_IP = get_env_variable('HIPACHE_REDIS_IP')
+HIPACHE_REDIS_PORT = get_env_variable('HIPACHE_REDIS_PORT')
+
+# Domain from where demo apps are served, example: demo.appsembler.com
+DEMO_APPS_CUSTOM_DOMAIN = get_env_variable('DEMO_APPS_CUSTOM_DOMAIN')
+
+# Default settings for app containers
+DEFAULT_NUMBER_OF_CPUS = 0.1
+DEFAULT_AMOUNT_OF_RAM = 128

@@ -1,10 +1,15 @@
+app_url: launcher.dev
+shipyard_url: shipyard.dev
+remote_user: vagrant
+server: launcher
+sendfile: 'off'
+
 # application config
 app_name: launcher
 git_repo_url: https://github.com/appsembler/launcher.git
-git_repo_branch: master
+git_repo_branch: feature/shipyard-ansible
 git_repo_dir: /opt/launcher
-server_name: launcher.appsembler.com
-venv_dir: /opt/venv
+venv_dir: /opt/venv/launcher
 
 # memcached config
 memcached_memory: 16

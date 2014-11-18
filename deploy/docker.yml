@@ -1,0 +1,10 @@
+---
+- hosts: docker
+  remote_user: "{{remote_user}}"
+  gather_facts: true
+  vars_files:
+    - hosts/{{environment}}/secret_vars.yml
+  roles:
+    - common
+    - docker
+    - {role: 'newrelic', newrelic_server: true}

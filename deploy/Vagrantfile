@@ -10,39 +10,46 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "precise64"
-
-  # The url from where the 'config.vm.box' box will be fetched if it
-  # doesn't already exist on the user's system.
-  config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box"
-
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  config.vm.network :forwarded_port, guest: 80, host: 8080
-
-  # Create a private network, which allows host-only access to the machine
-  # using a specific IP.
-  config.vm.network :private_network, ip: "192.168.33.10"
+  config.vm.box = "ubuntu/trusty64"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
   # your network.
   config.vm.network :public_network
+  config.dns.tld = "dev"
 
-  # Provider-specific configuration so you can fine-tune various
-  # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
-  config.vm.provider :virtualbox do |vb|
-      # Use VBoxManage to customize the VM. For example to change memory:
-    vb.customize ["modifyvm", :id, "--memory", "1024"]
+
+  config.vm.define "launcher" do |launcher|
+    launcher.vm.network :forwarded_port, guest: 80, host: 8080
+    launcher.vm.network :private_network, ip: "192.168.33.10"
+    launcher.vm.hostname = "launcher"
+    launcher.dns.patterns = [/^launcher.dev$/, /^shipyard.dev$/, /^.*demo.dev$/]
+
+    launcher.vm.provider :virtualbox do |vb|
+        # Use VBoxManage to customize the VM. For example to change memory:
+        vb.customize ["modifyvm", :id, "--memory", "1024"]
+    end
+    launcher.vm.provision "ansible" do |ansible|
+        ansible.playbook = "site.yml"
+        ansible.inventory_path = "hosts/vagrant/inventory"
+        ansible.sudo = true
+        #ansible.tags = ['hipache', 'shipyard']
+    end
   end
 
-  config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "site.yml"
-    ansible.inventory_path = "vagrant"
-    ansible.sudo = true
-    ansible.limit = 'all'
+  config.vm.define "docker" do |docker|
+    docker.vm.network :private_network, ip: "192.168.33.20"
+    docker.vm.hostname = "docker"
+
+    docker.vm.provider :virtualbox do |vb|
+        # Use VBoxManage to customize the VM. For example to change memory:
+        vb.customize ["modifyvm", :id, "--memory", "4096"]
+    end
+    docker.vm.provision "ansible" do |ansible|
+        ansible.playbook = "site.yml"
+        ansible.inventory_path = "hosts/vagrant/inventory"
+        ansible.sudo = true
+    end
   end
+
 end

@@ -1,10 +1,10 @@
 ---
 
 - name: start supervisor
-  action: service name=supervisord state=started
+  service: name=supervisord state=started
 
 - name: restart supervisor
-  action: service name=supervisord state=restarted
+  service: name=supervisord state=restarted
 
 - name: reload supervisor config
   command: supervisorctl reload
