@@ -1,1 +1,4 @@
 environment: production
+docker_server_cpus: 4
+# in megabytes, 1gb=1024
+docker_server_memory: 4096

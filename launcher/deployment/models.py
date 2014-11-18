@@ -1,9 +1,7 @@
 import datetime
+import dateutil.relativedelta
 import json
 import logging
-from allauth.account.models import EmailAddress
-import pusher
-import requests
 import time
 from urlparse import urlparse
 
@@ -16,7 +14,10 @@ from django.template.defaultfilters import slugify
 from django.utils import timezone
 
 import intercom
+import pusher
 import redis
+import requests
+from allauth.account.models import EmailAddress
 from customerio import CustomerIO
 from model_utils.fields import StatusField
 from model_utils import Choices
@@ -66,6 +67,26 @@ class Project(models.Model):
 
     def landing_page_url(self):
         return reverse('landing_page', kwargs={'slug': self.slug})
+
+    def get_trial_duration(self, account_activated=False):
+        if account_activated:
+            return self.trial_duration or settings.DEFAULT_TRIAL_DURATION
+        else:
+            return self.unconfirmed_trial_duration or settings.DEFAULT_UNCONFIRMED_TRIAL_DURATION
+
+    def get_human_readable_trial_duration(self, account_activated=False):
+        trial_duration = self.get_trial_duration(account_activated)
+        if trial_duration <= 60:
+            return "{0} minutes".format(trial_duration)
+        else:
+            delta = dateutil.relativedelta.relativedelta(minutes=trial_duration)
+            text = "{0} hour".format(delta.hours)
+            # add an 's' if there multiple hours
+            if delta.hours > 1:
+                text += "s"
+            if delta.minutes > 0:
+                text += " and {0} minutes".format(delta.minutes)
+        return text
 
 
 class Deployment(models.Model):
@@ -124,12 +145,9 @@ class Deployment(models.Model):
     get_remaining_minutes.short_description = 'Minutes remaining'
 
     def calculate_expiration_datetime(self, email):
-        unconfirmed_trial_duration = self.project.unconfirmed_trial_duration or settings.DEFAULT_UNCONFIRMED_TRIAL_DURATION
-        trial_duration = self.project.trial_duration or settings.DEFAULT_TRIAL_DURATION
-        if not EmailAddress.objects.filter(email=email, verified=True).exists():
-            expiration_datetime = self.launch_time + datetime.timedelta(minutes=unconfirmed_trial_duration)
-        else:
-            expiration_datetime = self.launch_time + datetime.timedelta(minutes=trial_duration)
+        account_activated = EmailAddress.objects.filter(email=email, verified=True).exists()
+        trial_duration = self.project.get_trial_duration(account_activated)
+        expiration_datetime = self.launch_time + datetime.timedelta(minutes=trial_duration)
         return expiration_datetime
 
     def deploy(self):
@@ -189,9 +207,10 @@ class Deployment(models.Model):
             docker_server = urlparse(response[0]['engine']['addr'])
             docker_server_ip = docker_server.hostname
             for hostname in self.project.hostnames.split(" "):
-                domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
-            else:
-                domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+                if hostname:
+                    domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+                else:
+                    domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
             # maps internal container ports to domains
             port_domain_mapping = {int(port): domain for port, domain in zip(ports, domains)}
             # maps internal container ports to public ports (for example: 80 -> 49302)
@@ -230,13 +249,14 @@ class Deployment(models.Model):
             except:
                 pass
             if self.email:
+                account_activated = EmailAddress.objects.filter(email=self.email, verified=True).exists()
                 cio.track(customer_id=self.email,
                           name='app_deploy_complete',
                           app_url=self.url.replace(" ", "\n"),
                           app_name=self.project.name,
                           status_url="http://launcher.appsembler.com" + reverse(
                               'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
-                          trial_duration=self.project.trial_duration,
+                          trial_duration=self.project.get_human_readable_trial_duration(account_activated),
                           username=self.project.default_username,
                           password=self.project.default_password
                 )
@@ -264,7 +284,7 @@ class Deployment(models.Model):
                 customer_id=self.email,
                 name='app_expiring_soon',
                 app_name=self.project.name,
-                app_url=self.url.replace(" ", "\n"),
+                app_url=self.url,
                 status_url="http://launcher.appsembler.com" + reverse(
                     'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
                 remaining_minutes=self.get_remaining_minutes(),

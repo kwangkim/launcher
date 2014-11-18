@@ -47,7 +47,7 @@
 - name: Insert Shipyard engine
   command: >
     recli -h {{rethinkdb['ansible_facts']['docker_containers'][0]["NetworkSettings"]["IPAddress"]}}
-     'r.db("shipyard").table("config").insert({engine: {Addr: "http://{{item}}:2375", Cpus: 1, ID: "docker", Labels: ["dev"], Memory: 1024}})'
+     'r.db("shipyard").table("config").insert({engine: {Addr: "http://{{item}}:2375", Cpus: {{docker_server_cpus}}, ID: "docker", Labels: ["dev"], Memory: {{docker_server_memory}} }})'
   with_items: groups['docker']
 
 # needed for Shipyard to pick up changes made in RethinkDB

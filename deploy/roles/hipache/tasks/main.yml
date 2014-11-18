@@ -1,13 +1,22 @@
 ---
 
 - name: Pull the Hipache image
-  docker_pull: repo=tutum/hipache tag=0.3.1
+  docker_pull: repo={{item.image_name}} tag={{item.tag}}
+  with_items:
+    - { image_name: 'tutum/hipache', tag: '0.3.1'}
+    - { image_name: 'redis', tag: '2.8'}
 
-- name: Start hipache data container
-  docker: image=tutum/hipache volumes=/var/lib/redis name=hipache-data stdin_open=yes tty=yes command="/bin/bash -l"
+- name: Start hipache redis data container
+  docker: image=redis volumes=/data name=hipache-redis-data stdin_open=yes tty=yes command="/bin/bash -l"
+
+- name: Start hipache redis container
+  docker: image=redis volumes_from=hipache-redis-data name=hipache-redis ports=127.0.0.1:{{hipache_redis_port}}:6379 command="redis-server --appendonly yes"
+
+- name: Copy Hipache Redis Upstart script
+  copy: src=upstart_redis.conf dest=/etc/init/docker_hipache_redis.conf mode=0644
 
 - name: Start hipache
-  docker: image=tutum/hipache volumes_from=hipache-data name=hipache ports=80:80,127.0.0.1:63790:6379 env="SERVER_WORKERS=4"
+  docker: image=tutum/hipache links=hipache-redis:redis name=hipache ports=80:80 env="SERVER_WORKERS=4"
 
 - name: Wait for hipache redis port
   wait_for: host=127.0.0.1 port={{hipache_redis_port}} delay=3
@@ -17,6 +26,9 @@
 
 - name: Delete old Launcher DNS entry in hipache
   command: redis-cli -p 63790 del frontend:{{app_url}}
+
+- name: Delete old Launcher DNS entry in hipache
+  command: redis-cli -p 63790 del frontend:{{shipyard_url}}
 
 - name: Insert Launcher DNS entry in hipache
   command: redis-cli -p 63790 rpush frontend:{{app_url}} launcher http://{{ansible_default_ipv4['address']}}:8000
