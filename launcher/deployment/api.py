@@ -1,3 +1,4 @@
+from allauth.account.models import EmailAddress
 from allauth.utils import generate_unique_username
 from django.contrib.auth.models import User
 
@@ -32,6 +33,9 @@ class DeploymentResource(ModelResource):
         email = bundle.data['email'].strip().lower()
         try:
             user = User.objects.get(email=email)
+            account_activated = EmailAddress.objects.filter(email=email, verified=True).exists()
+            if not account_activated:
+                send_email_confirmation(bundle.request, user, signup=False)
         except User.DoesNotExist:
             username = generate_unique_username([email, 'user'])
             user = User.objects.create_user(username=username, email=email)
