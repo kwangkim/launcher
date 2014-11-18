@@ -202,7 +202,7 @@ class Deployment(models.Model):
                 'message': "Assigning an URL to the app...",
                 'percent': 75
             })
-            time.sleep(2)
+            time.sleep(7)
             domains = []
             docker_server = urlparse(response[0]['engine']['addr'])
             docker_server_ip = docker_server.hostname
