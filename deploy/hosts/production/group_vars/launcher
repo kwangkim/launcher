@@ -1,6 +1,7 @@
 app_url: launcher.appsembler.com
-shipyard_url: shipyard.appsembler.com
+shipyard_url: shipyard.demo.appsembler.com
 remote_user: root
+server: launcher
 sendfile: 'on'
 
 # application config
