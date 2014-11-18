@@ -1,5 +1,10 @@
 # Changelog
 
+### 2.0.1
+
+* send confirmation emails to existing users with unverified accounts
+* sleep a bit longer when deploying to allow apps in the deployed container to start
+
 ## 2.0
 
 * uses Shipyard 2.0 for deploying docker containers
