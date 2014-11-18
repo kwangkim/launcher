@@ -14,7 +14,7 @@
     - uwsgi
     - redis
     - app_deployment
-    - newrelic
+    - {role: 'newrelic', newrelic_app: true, newrelic_server: true}
     - supervisor
     - {role: hipache, tags: hipache}
     - {role: shipyard, tags: shipyard}
