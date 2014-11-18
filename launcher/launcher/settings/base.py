@@ -356,3 +356,7 @@ HIPACHE_REDIS_PORT = get_env_variable('HIPACHE_REDIS_PORT')
 
 # Domain from where demo apps are served, example: demo.appsembler.com
 DEMO_APPS_CUSTOM_DOMAIN = get_env_variable('DEMO_APPS_CUSTOM_DOMAIN')
+
+# Default settings for app containers
+DEFAULT_NUMBER_OF_CPUS = 0.1
+DEFAULT_AMOUNT_OF_RAM = 128

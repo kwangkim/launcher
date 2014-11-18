@@ -44,6 +44,8 @@ class Project(models.Model):
     )
     env_vars = models.CharField(max_length=500, blank=True,
                                 help_text="Space separated environment variables, example: key1=val1 key2=val2")
+    number_of_cpus = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
+    amount_of_ram = models.PositiveIntegerField('Amount of RAM in MB', blank=True, null=True)
     trial_duration = models.IntegerField(blank=True, null=True, help_text="Trial duration in minutes")
     unconfirmed_trial_duration = models.IntegerField(blank=True, null=True, help_text="Trial duration in minutes")
     slug = models.SlugField(max_length=40, editable=True, blank=True, null=True)
@@ -177,8 +179,8 @@ class Deployment(models.Model):
 
         payload = {
             "name": self.project.image_name,
-            "cpus": 0.8,
-            "memory": 2048,
+            "cpus": float(self.project.number_of_cpus or settings.DEFAULT_NUMBER_OF_CPUS),
+            "memory": self.project.amount_of_ram or settings.DEFAULT_AMOUNT_OF_RAM,
             "type": "service",
             "container_name": self.deploy_id,
             "hostname": self.deploy_id,
