@@ -39,8 +39,8 @@ def destroy_expired_apps():
             headers = {
                 'X-Service-Key': settings.SHIPYARD_KEY
             }
-            r = requests.delete(
-                "{0}/api/containers/{1}".format(
+            r = requests.get(
+                "{0}/api/containers/{1}/stop".format(
                     settings.SHIPYARD_HOST,
                     app.remote_container_id,
                 ),
