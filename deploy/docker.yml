@@ -5,3 +5,4 @@
   roles:
     - common
     - docker
+    - {role: 'newrelic', tags: 'newrelic_server'}
