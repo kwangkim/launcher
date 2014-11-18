@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0
+
+* uses Shipyard 2.0 for deploying docker containers
+* custom hipache routing
+* per project configurable cpu/ram settings
+* complete ansible scripts for deploying
+* local Vagrant setup for testing
+* email address confirmation after deploy
+* per project time trial duration for confirmed and unconfirmed users
+* lots of minor bug fixes and improvements
+
+
 ### 1.5.4
 
 * use correct Intercom app id
@@ -99,7 +111,7 @@
 * fixed the RST embed codes
 * fixed the URL of the embed buttons
 
-### 1.0
+## 1.0
 
 * added ansible scripts for deploying to Debian/Ubuntu servers
 * removed all OpenShift data

@@ -46,6 +46,12 @@ You also need working [Pusher](http://pusher.com/), [Customer.io](http://custome
 		# Customer.io settings
 		export CUSTOMERIO_SITE_ID=''
 		export CUSTOMERIO_API_KEY=''
+		
+		# Intercom.io settings
+		export INTERCOM_APP_ID=''
+		export INTERCOM_API_KEY=''
+		export INTERCOM_EDX_APP_ID=''
+		export INTERCOM_EDX_APP_SECRET=''
 
 
 3. Clone this repo: `git clone git@github.com:appsembler/launcher.git`
