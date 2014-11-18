@@ -1,7 +1,7 @@
 import os
 from os.path import join, abspath, dirname
+from django.contrib.messages import constants as message_constants
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse_lazy
 
 
 def get_env_variable(var_name):
@@ -22,7 +22,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Nate Aune', 'nate@appsembler.com'),
+    #('Nate Aune', 'nate@appsembler.com'),
     ('Filip Jukic', 'filip@appsembler.com'),
 )
 
@@ -47,7 +47,8 @@ DATABASES = {
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = [
     '.appsembler.com',
-    '162.243.216.108',
+    '.dev',
+    '.jukic.me',
     '127.0.0.1',
     '192.168.33.10',
 ]
@@ -235,6 +236,8 @@ LOGGING = {
     },
 }
 
+MESSAGE_LEVEL = message_constants.SUCCESS
+
 # Bower config
 BOWER_COMPONENTS_ROOT = root('components')
 
@@ -309,6 +312,7 @@ AUTHENTICATION_BACKENDS = (
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Launcher] "
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/'
 EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/'
@@ -346,7 +350,6 @@ INTERCOM_EDX_APP_SECRET = get_env_variable('INTERCOM_EDX_APP_SECRET')
 
 # Docker settings
 SHIPYARD_HOST = get_env_variable('SHIPYARD_HOST')
-SHIPYARD_HOST_IP = get_env_variable('SHIPYARD_HOST_IP')
 SHIPYARD_KEY = get_env_variable('SHIPYARD_KEY')
 HIPACHE_REDIS_IP = get_env_variable('HIPACHE_REDIS_IP')
 HIPACHE_REDIS_PORT = get_env_variable('HIPACHE_REDIS_PORT')

@@ -1,20 +1,20 @@
 ---
 
-- name: Ensure Python development tools are available
-  apt: pkg={{item}} state=latest
-  with_items:
-    - python-dev
-    - python-setuptools
-    - python-pycurl
-
-- name: Install pip
-  easy_install: name=pip
-
 - name: Update python-setuptools
   pip: name=setuptools state=latest extra_args='--no-use-wheel'
 
-- name: Install virtualenv.
-  pip: name=virtualenv state=latest
+- name: Install virtualenv and virtualenvwrapper
+  pip: name={{item}} state=latest
+  with_items:
+    - virtualenv
+    - virtualenvwrapper
+
+- name: Set up virtualenvwrapper
+  lineinfile: dest=/root/.zshrc line="{{item}}" state=present
+  with_items:
+    - "export WORKON_HOME='/opt/venv/'"
+    - "export PROJECT_HOME='/opt/'"
+    - "source /usr/local/bin/virtualenvwrapper.sh"
 
 - name: Add node.js repo
   apt_repository: repo='ppa:chris-lea/node.js'

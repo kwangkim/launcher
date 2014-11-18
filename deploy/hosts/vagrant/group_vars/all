@@ -1,0 +1,4 @@
+environment: vagrant
+docker_server_cpus: 2
+# in megabytes, 1gb=1024
+docker_server_memory: 4096

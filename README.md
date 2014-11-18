@@ -1,4 +1,22 @@
 # Appsembler Launch
+
+## New instructions
+
+Install Vagrant and Virtualbox.
+
+	$ vagrant plugin install vagrant-dns
+	$ vagrant dns --install
+	$ git clone --recursive git@github.com:appsembler/launcher.git
+	$ cd launcher/deploy
+	$ cp secret_vars.yml.example hosts/vagrant/secret_vars.yml  (<-- edit this file with your settings)
+	$ vagrant up
+	
+If you forgot to use `--recursive` the first time you cloned the repository, you can pull the submodules (`docker_pull` in this case), using this command:
+
+	$ git submodule update --init --recursive
+	
+# Old instructions
+
 ## Local development set up
 
 This instructions are written under the assumption that you have [virtualenvwrapper](http://virtualenvwrapper.readthedocs.org/en/latest/) set up on your machine.

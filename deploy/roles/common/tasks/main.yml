@@ -4,7 +4,7 @@
   apt: update_cache=yes cache_valid_time=3600
 
 - name: Install common packages
-  apt: pkg={{item}} state=present
+  apt: name={{item}} state=latest
   with_items:
     - vim
     - git-core
@@ -14,10 +14,31 @@
     - libxslt1-dev
     - htop
     - iotop
+    - linux-image-extra-{{ansible_kernel}}
     - python-software-properties
     - python
     - g++
     - make
 
-- name: Generate locales
-  command: locale-gen hr_HR.UTF-8
+- name: Do not pass locales over SSH
+  lineinfile: dest=/etc/ssh/sshd_config line="AcceptEnv LANG LC_*" state=absent
+  tags: ssh
+
+- name: Ensure Python development tools are available
+  apt: name={{item}} state=latest
+  with_items:
+    - python-dev
+    - python-setuptools
+    - python-pycurl
+
+- name: Install pip
+  easy_install: name=pip
+
+- name: Install ZSH
+  apt: name=zsh state=latest
+
+- name: Install oh-my-zsh
+  shell: curl -L http://install.ohmyz.sh | /usr/bin/zsh
+
+- name: Copy .zshrc config
+  copy: src=zshrc dest=/root/.zshrc

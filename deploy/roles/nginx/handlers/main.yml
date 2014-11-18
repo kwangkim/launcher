@@ -1,10 +1,10 @@
 ---
 
 - name: start nginx
-  action: service name=nginx state=started
+  service: name=nginx state=started
 
 - name: restart nginx
-  action: service name=nginx state=restarted
+  service: name=nginx state=restarted
 
 - name: reload nginx
-  action: service name=nginx state=reloaded
+  service: name=nginx state=reloaded

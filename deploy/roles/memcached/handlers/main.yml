@@ -1,7 +1,7 @@
 ---
 
 - name: start memcached
-  action: service name=memcached state=started
+  service: name=memcached state=started
 
 - name: restart memcached
-  action: service name=memcached state=restarted
+  service: name=memcached state=restarted

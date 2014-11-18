@@ -1,0 +1,20 @@
+---
+- hosts: launcher
+  remote_user: "{{remote_user}}"
+  gather_facts: true
+  vars_files:
+    - hosts/{{environment}}/secret_vars.yml
+  roles:
+    - common
+    - docker
+    - pythondev
+    - postgresql
+    - memcached
+    - nginx
+    - uwsgi
+    - redis
+    - app_deployment
+    - newrelic
+    - supervisor
+    - {role: hipache, tags: hipache}
+    - {role: shipyard, tags: shipyard}

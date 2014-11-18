@@ -1,0 +1,3 @@
+[submodule "deploy/library/docker_pull"]
+	path = deploy/library/docker_pull
+	url = https://github.com/meatballhat/ansible-module-docker-pull.git

@@ -4,7 +4,7 @@
   apt_repository: repo='ppa:chris-lea/redis-server'
 
 - name: Install redis
-  apt: pkg=redis-server state=latest
+  apt: name=redis-server state=latest
 
 - name: Copy redis upstart script
   copy: src=redis-server.conf dest=/etc/init/ owner=root group=root

@@ -207,7 +207,7 @@
     "pk": 17,
     "model": "deployment.project",
     "fields": {
-        "status": "Active",
+        "status": "Inactive",
         "slug": "edx-lms",
         "name": "edX LMS",
         "survey_form_url": "",

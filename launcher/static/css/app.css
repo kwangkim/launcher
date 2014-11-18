@@ -1,5 +1,4 @@
 body {
-  padding-top: 3%;
   padding-bottom: 40px;
   background-color: #f5f5f5;
 }
@@ -47,7 +46,7 @@ body {
 
 #central-widget {
   max-width: 320px;
-  margin: 0 auto 20px;
+  margin: 3% auto 20px;
 }
 
 .modal .btn {
@@ -65,4 +64,8 @@ body {
 
 #appsembler-logo {
     margin: 0 auto 20px;
+}
+
+.iframe .embed-buttons-message {
+    display: none;
 }

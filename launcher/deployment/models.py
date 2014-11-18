@@ -1,9 +1,7 @@
 import datetime
+import dateutil.relativedelta
 import json
 import logging
-from allauth.account.models import EmailAddress
-import pusher
-import requests
 import time
 from urlparse import urlparse
 
@@ -16,7 +14,10 @@ from django.template.defaultfilters import slugify
 from django.utils import timezone
 
 import intercom
+import pusher
 import redis
+import requests
+from allauth.account.models import EmailAddress
 from customerio import CustomerIO
 from model_utils.fields import StatusField
 from model_utils import Choices
@@ -65,6 +66,26 @@ class Project(models.Model):
     def landing_page_url(self):
         return reverse('landing_page', kwargs={'slug': self.slug})
 
+    def get_trial_duration(self, account_activated=False):
+        if account_activated:
+            return self.trial_duration or settings.DEFAULT_TRIAL_DURATION
+        else:
+            return self.unconfirmed_trial_duration or settings.DEFAULT_UNCONFIRMED_TRIAL_DURATION
+
+    def get_human_readable_trial_duration(self, account_activated=False):
+        trial_duration = self.get_trial_duration(account_activated)
+        if trial_duration <= 60:
+            return "{0} minutes".format(trial_duration)
+        else:
+            delta = dateutil.relativedelta.relativedelta(minutes=trial_duration)
+            text = "{0} hour".format(delta.hours)
+            # add an 's' if there multiple hours
+            if delta.hours > 1:
+                text += "s"
+            if delta.minutes > 0:
+                text += " and {0} minutes".format(delta.minutes)
+        return text
+
 
 class Deployment(models.Model):
     STATUS_CHOICES = (
@@ -100,9 +121,12 @@ class Deployment(models.Model):
         super(Deployment, self).save(*args, **kwargs)
         if self.status == 'Deploying':
             deploy.delay(self)
-            intercom.User.create(
-                email=self.email
-            )
+            try:
+                intercom.User.create(
+                    email=self.email
+                )
+            except:
+                pass
 
     def get_remaining_seconds(self):
         if self.expiration_time and self.expiration_time > timezone.now():
@@ -119,12 +143,9 @@ class Deployment(models.Model):
     get_remaining_minutes.short_description = 'Minutes remaining'
 
     def calculate_expiration_datetime(self, email):
-        unconfirmed_trial_duration = self.project.unconfirmed_trial_duration or settings.DEFAULT_UNCONFIRMED_TRIAL_DURATION
-        trial_duration = self.project.trial_duration or settings.DEFAULT_TRIAL_DURATION
-        if not EmailAddress.objects.filter(email=email, verified=True).exists():
-            expiration_datetime = self.launch_time + datetime.timedelta(minutes=unconfirmed_trial_duration)
-        else:
-            expiration_datetime = self.launch_time + datetime.timedelta(minutes=trial_duration)
+        account_activated = EmailAddress.objects.filter(email=email, verified=True).exists()
+        trial_duration = self.project.get_trial_duration(account_activated)
+        expiration_datetime = self.launch_time + datetime.timedelta(minutes=trial_duration)
         return expiration_datetime
 
     def deploy(self):
@@ -145,10 +166,10 @@ class Deployment(models.Model):
             env_vars = dict(item.split("=") for item in self.project.env_vars.split(" "))
         else:
             env_vars = {}
-        ports = [{"proto": "tcp", "container_port": int(port)} for port in ports]
+        bind_ports = [{"proto": "tcp", "container_port": int(port)} for port in ports]
         if "edx" in self.project.name.lower():
             env_vars["EDX_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["EDX_PREVIEW_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars["EDX_PREVIEW_LMS_BASE"] = "preview.lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
             env_vars["EDX_CMS_BASE"] = "cms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
             env_vars["INTERCOM_APP_ID"] = "{0}".format(settings.INTERCOM_EDX_APP_ID)
             env_vars["INTERCOM_APP_SECRET"] = "{0}".format(settings.INTERCOM_EDX_APP_SECRET)
@@ -156,13 +177,14 @@ class Deployment(models.Model):
 
         payload = {
             "name": self.project.image_name,
-            "cpus": 0.1,
-            "memory": 128,
+            "cpus": 0.8,
+            "memory": 2048,
             "type": "service",
+            "container_name": self.deploy_id,
             "hostname": self.deploy_id,
             "labels": ["dev"],
             "environment": env_vars,
-            "bind_ports": ports
+            "bind_ports": bind_ports
         }
         r = requests.post(
             "{0}/api/containers".format(settings.SHIPYARD_HOST),
@@ -180,19 +202,26 @@ class Deployment(models.Model):
             })
             time.sleep(2)
             domains = []
-            public_ports = [port["port"] for port in response[0]["ports"]]
-            for hostname in self.project.hostnames:
-                domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
-            else:
-                domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+            docker_server = urlparse(response[0]['engine']['addr'])
+            docker_server_ip = docker_server.hostname
+            for hostname in self.project.hostnames.split(" "):
+                if hostname:
+                    domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+                else:
+                    domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+            # maps internal container ports to domains
+            port_domain_mapping = {int(port): domain for port, domain in zip(ports, domains)}
+            # maps internal container ports to public ports (for example: 80 -> 49302)
+            public_container_port_mapping = {port["container_port"]: port["port"] for port in response[0]["ports"]}
             scheme = "https" if "443" in self.project.ports else "http"
             app_urls = []
             r = redis.StrictRedis(host=settings.HIPACHE_REDIS_IP, port=settings.HIPACHE_REDIS_PORT, db=0)
-            for domain, port in zip(domains, public_ports):
+            for internal_port, public_port in public_container_port_mapping.items():
+                domain = port_domain_mapping[internal_port]
                 app_url = "{0}://{1}".format(scheme, domain)
                 app_urls.append(app_url)
                 r.rpush("frontend:{0}".format(domain), self.deploy_id)
-                r.rpush("frontend:{0}".format(domain), "{0}://{1}:{2}".format(scheme, settings.SHIPYARD_HOST_IP, port))
+                r.rpush("frontend:{0}".format(domain), "{0}://{1}:{2}".format(scheme, docker_server_ip, public_port))
 
             self.url = " ".join(app_urls)
             self.status = 'Completed'
@@ -205,23 +234,27 @@ class Deployment(models.Model):
                 'username': self.project.default_username,
                 'password': self.project.default_password
             })
-            intercom.Event.create(
-                event_name="deployed_app",
-                email=self.email,
-                metadata={
-                    'app_name': self.project.name,
-                    'app_url': self.url,
-                    'deploy_id': self.deploy_id,
-                }
-            )
+            try:
+                intercom.Event.create(
+                    event_name="deployed_app",
+                    email=self.email,
+                    metadata={
+                        'app_name': self.project.name,
+                        'app_url': self.url,
+                        'deploy_id': self.deploy_id,
+                    }
+                )
+            except:
+                pass
             if self.email:
+                account_activated = EmailAddress.objects.filter(email=self.email, verified=True).exists()
                 cio.track(customer_id=self.email,
                           name='app_deploy_complete',
                           app_url=self.url.replace(" ", "\n"),
                           app_name=self.project.name,
                           status_url="http://launcher.appsembler.com" + reverse(
                               'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
-                          trial_duration=self.project.trial_duration,
+                          trial_duration=self.project.get_human_readable_trial_duration(account_activated),
                           username=self.project.default_username,
                           password=self.project.default_password
                 )
@@ -249,7 +282,7 @@ class Deployment(models.Model):
                 customer_id=self.email,
                 name='app_expiring_soon',
                 app_name=self.project.name,
-                app_url=self.url.replace(" ", "\n"),
+                app_url=self.url,
                 status_url="http://launcher.appsembler.com" + reverse(
                     'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
                 remaining_minutes=self.get_remaining_minutes(),
