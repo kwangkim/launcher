@@ -1,5 +1,9 @@
 # Changelog
 
+### 2.0.2
+
+* fix a bug that extended the time trial for all users, not just the one confirming the email address
+
 ### 2.0.1
 
 * send confirmation emails to existing users with unverified accounts

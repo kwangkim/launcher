@@ -81,7 +81,7 @@ class ConfirmEmail(allauth_views.ConfirmEmailView):
 
     def extend_apps_trial(self, email):
         # extend currently running apps when the user confirms his email address
-        apps = Deployment.objects.filter(status='Completed')
+        apps = Deployment.objects.filter(status='Completed', email=email)
         for app in apps:
             app.expiration_time = app.calculate_expiration_datetime(email)
             app.save()
