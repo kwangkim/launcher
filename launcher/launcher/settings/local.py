@@ -32,6 +32,7 @@ CELERYBEAT_SCHEDULE = {
     },
 }
 
+CELERY_ALWAYS_EAGER = True
 
 LOGGING = {
     'version': 1,
@@ -84,4 +85,12 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     #'django.middleware.clickjacking.XFrameOptionsMiddleware',
+)
+
+
+STATICFILES_FINDERS = (
+    'pipeline.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
+    'pipeline.finders.CachedFileFinder',
 )
