@@ -76,7 +76,10 @@ class Project(models.Model):
         return [hostname for hostname in self.hostnames.split(' ') if hostname]
 
     def clean(self):
-        port_list = self.port_list
+        try:
+            port_list = self.port_list
+        except ValueError:
+            raise ValidationError({'ports': ['Invalid port(s).']})
         hostname_list = self.hostname_list
         assert len(port_list) > 0
         if len(port_list) == 1:

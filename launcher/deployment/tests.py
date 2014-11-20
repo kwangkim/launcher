@@ -22,11 +22,20 @@ class ProjectModelTests(SimpleTestCase):
 
         self.project.ports = 'aaa'
         with self.assertRaises(ValueError):
-            self.assertFalse(self.project.port_list)
+            self.project.port_list
 
         self.project.ports = ' 80  8080  aaa  16800 '
         with self.assertRaises(ValueError):
-            self.assertFalse(self.project.port_list)
+            self.project.port_list
+
+    def test_ports_validation(self):
+        self.project.ports = 'aaa'
+        with self.assertRaisesMessage(ValidationError, "{'ports': [u'Invalid port(s).']}"):
+            self.project.full_clean()
+
+        self.project.ports = ' 80  8080  aaa  16800 '
+        with self.assertRaisesMessage(ValidationError, "{'ports': [u'Invalid port(s).']}"):
+            self.project.full_clean()
 
     def test_hostnames(self):
         self.project.hostnames = 'lms cms'
