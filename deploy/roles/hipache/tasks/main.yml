@@ -16,7 +16,7 @@
   copy: src=upstart_redis.conf dest=/etc/init/docker_hipache_redis.conf mode=0644
 
 - name: Start hipache
-  docker: image=tutum/hipache links=hipache-redis:redis name=hipache ports=80:80 env="SERVER_WORKERS=5"
+  docker: image=tutum/hipache links=hipache-redis:redis name=hipache ports=80:80 env="SERVER_WORKERS={{hipache_workers}}"
 
 - name: Wait for hipache redis port
   wait_for: host=127.0.0.1 port={{hipache_redis_port}} delay=3

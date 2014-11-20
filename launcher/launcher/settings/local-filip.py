@@ -22,21 +22,3 @@ DATABASES = {
         'PORT': '',                      # Set to empty string for default.
     }
 }
-
-CELERYBEAT_SCHEDULE = {
-    'app-expires-soon-notify': {
-        'task': 'deployment.tasks.app_expiring_soon_reminder',
-        'schedule': timedelta(seconds=60),
-    },
-    'destroy-expired-apps': {
-        'task': 'deployment.tasks.destroy_expired_apps',
-        'schedule': timedelta(seconds=20),
-    },
-}
-
-STATICFILES_FINDERS = (
-    'pipeline.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'pipeline.finders.PipelineFinder',
-    'pipeline.finders.CachedFileFinder',
-)

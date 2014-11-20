@@ -102,7 +102,7 @@ class Deployment(models.Model):
     email = models.EmailField()
     deploy_id = models.CharField(max_length=100)
     remote_container_id = models.CharField(max_length=64)
-    remote_app_id = models.CharField(max_length=100)
+    remote_app_id = models.CharField(max_length=100, blank=True)
     launch_time = models.DateTimeField(blank=True, null=True)
     expiration_time = models.DateTimeField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)

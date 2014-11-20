@@ -4,6 +4,12 @@ remote_user: vagrant
 server: launcher
 sendfile: 'off'
 
+# hipache config
+hipache_workers: 2
+
+# celery config
+celery_workers: 1
+
 # application config
 app_name: launcher
 git_repo_url: https://github.com/appsembler/launcher.git

@@ -28,6 +28,11 @@ class DeploymentResource(ModelResource):
         authorization = Authorization()
         always_return_data = True
 
+    def hydrate_email(self, bundle):
+        email = bundle.data['email'].strip().lower().replace(" ", "")
+        bundle.data['email'] = email
+        return bundle
+
     def obj_create(self, bundle, **kwargs):
         # create user if it doesn't exist already
         email = bundle.data['email'].strip().lower()
