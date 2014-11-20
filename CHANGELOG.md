@@ -1,5 +1,11 @@
 # Changelog
 
+### 2.0.3
+
+* fix a bug that crashed loggers when dealing with unicode
+* reorganized local settings
+* allow `Deployment.remote_app_id ` to be blank
+
 ### 2.0.2
 
 * fix a bug that extended the time trial for all users, not just the one confirming the email address
