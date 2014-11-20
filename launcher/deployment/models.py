@@ -75,6 +75,18 @@ class Project(models.Model):
     def hostname_list(self):
         return [hostname for hostname in self.hostnames.split(' ') if hostname]
 
+    @property
+    def env_var_dict(self):
+        d = {}
+        for pair in self.env_vars.split(' '):
+            if not pair:
+                continue
+            key, equals, value = pair.partition('=')
+            if not key or not value or equals != '=':
+                raise ValueError
+            d[key] = value
+        return d
+
     def clean(self):
         try:
             port_list = self.port_list
@@ -88,6 +100,11 @@ class Project(models.Model):
         else:
             if len(port_list) != len(hostname_list):
                 raise ValidationError({'hostnames': ['The number of hostnames has to match the number of ports.']})
+        try:
+            self.env_var_dict
+        except ValueError:
+            raise ValidationError({'env_vars': ['This string has an incorrect format.']})
+
 
     def landing_page_url(self):
         return reverse('landing_page', kwargs={'slug': self.slug})
@@ -187,19 +204,16 @@ class Deployment(models.Model):
             'X-Service-Key': settings.SHIPYARD_KEY
         }
         # run the container
-        if self.project.env_vars:
-            env_vars = dict(item.split("=") for item in self.project.env_vars.split(" "))
-        else:
-            env_vars = {}
+        env_vars_dict = self.project.env_vars_dict
         port_list = self.project.port_list
         bind_ports = [{"proto": "tcp", "container_port": port} for port in port_list]
         if "edx" in self.project.name.lower():
-            env_vars["EDX_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["EDX_PREVIEW_LMS_BASE"] = "preview.lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["EDX_CMS_BASE"] = "cms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["INTERCOM_APP_ID"] = "{0}".format(settings.INTERCOM_EDX_APP_ID)
-            env_vars["INTERCOM_APP_SECRET"] = "{0}".format(settings.INTERCOM_EDX_APP_SECRET)
-            env_vars["INTERCOM_USER_EMAIL"] = "{0}".format(self.email)
+            env_vars_dict["EDX_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars_dict["EDX_PREVIEW_LMS_BASE"] = "preview.lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars_dict["EDX_CMS_BASE"] = "cms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars_dict["INTERCOM_APP_ID"] = settings.INTERCOM_EDX_APP_ID
+            env_vars_dict["INTERCOM_APP_SECRET"] = settings.INTERCOM_EDX_APP_SECRET
+            env_vars_dict["INTERCOM_USER_EMAIL"] = self.email
 
         payload = {
             "name": self.project.image_name,
@@ -209,7 +223,7 @@ class Deployment(models.Model):
             "container_name": self.deploy_id,
             "hostname": self.deploy_id,
             "labels": ["dev"],
-            "environment": env_vars,
+            "environment": env_vars_dict,
             "bind_ports": bind_ports
         }
         r = requests.post(

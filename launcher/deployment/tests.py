@@ -65,3 +65,37 @@ class ProjectModelTests(SimpleTestCase):
         self.project.hostnames = 'lms cms'
         self.project.full_clean()
 
+    def test_env_vars(self):
+        self.project.env_vars = ''
+        self.assertDictEqual(self.project.env_var_dict, {})
+
+        self.project.env_vars = '   key=val  '
+        self.assertDictEqual(self.project.env_var_dict, {'key': 'val'})
+
+        self.project.env_vars = '   key=val  key2=val2'
+        self.assertDictEqual(self.project.env_var_dict, {'key': 'val',
+                                                         'key2': 'val2'})
+
+        self.project.env_vars = '   key=val  key2=val2  key3=  '
+        with self.assertRaises(ValueError):
+            self.project.env_var_dict
+
+    def test_env_vars_validation(self):
+        self.project.ports = '80'  # required by Project.full_clean()
+
+        self.project.env_vars = ''
+        self.project.full_clean()
+
+        self.project.env_vars = '   key=val  '
+        self.project.full_clean()
+
+        self.project.env_vars = '   key=val  key2=val2'
+        self.project.full_clean()
+
+        self.project.env_vars = '   key=val  key2=val2  key3=  '
+        with self.assertRaisesMessage(ValidationError, "{'env_vars': [u'This string has an incorrect format.']}"):
+            self.project.full_clean()
+
+        self.project.env_vars = '   key=val  key2=val2  key3=  key4=1234'
+        with self.assertRaisesMessage(ValidationError, "{'env_vars': [u'This string has an incorrect format.']}"):
+            self.project.full_clean()
