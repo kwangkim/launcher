@@ -221,9 +221,9 @@ App.EmbedView = Backbone.View.extend({
     }
 });
 
-$(function(){
-    App.deployFormView  = new App.DeployFormView();
-    if(App.deployFormView.showEmbedButtons === true) {
-        App.embedView = new App.EmbedView({el: '#embed-buttons'});
-    }
-});
+//$(function(){
+//    App.deployFormView  = new App.DeployFormView();
+//    if(App.deployFormView.showEmbedButtons === true) {
+//        App.embedView = new App.EmbedView({el: '#embed-buttons'});
+//    }
+//});

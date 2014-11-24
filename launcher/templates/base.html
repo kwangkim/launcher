@@ -6,6 +6,12 @@
     <title>Appsembler Launcher</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
+    <script src="http://fb.me/react-0.12.1.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.12.1.js"></script>
+    <script type="text/jsx" src="{% static 'js/app.react.js' %}"></script>
+    <script>
+      window.STATIC_URL = {{ STATIC_URL }};
+    </script>
     {% compressed_css 'launcher_main' %}
     {% block extra_css %}{% endblock extra_css %}
     {% compressed_js 'launcher_main' %}
