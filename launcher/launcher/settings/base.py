@@ -43,6 +43,8 @@ DATABASES = {
     }
 }
 
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = [
@@ -172,7 +174,6 @@ INSTALLED_APPS = (
     'django_extensions',
     'kombu.transport.django',
     'pipeline',
-    'south',
     'tastypie',
 
     # Project apps
@@ -360,3 +361,4 @@ DEMO_APPS_CUSTOM_DOMAIN = get_env_variable('DEMO_APPS_CUSTOM_DOMAIN')
 # Default settings for app containers
 DEFAULT_NUMBER_OF_CPUS = 0.1
 DEFAULT_AMOUNT_OF_RAM = 128
+
