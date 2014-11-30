@@ -4,7 +4,7 @@ var DeployerWidget = React.createClass({
     propTypes: {
         projects: React.PropTypes.array
     },
-    render: function () {
+    render() {
         return (
             <div id="central-widget">
                 <form className="form-deploy" method="post">
@@ -25,7 +25,7 @@ var ProjectSelectWidget = React.createClass({
     propTypes: {
         projects: React.PropTypes.array
     },
-    render: function () {
+    render() {
         return (
             <select name="project" id="project_select" className="form-control">
                 {this.props.projects.map(function (project) {
@@ -40,7 +40,7 @@ var ProjectItem = React.createClass({
     propTypes: {
         project: React.PropTypes.object
     },
-    render: function () {
+    render() {
         return (
             <option value={this.props.project.resource_uri}>{this.props.project.name}</option>
         );
@@ -48,30 +48,30 @@ var ProjectItem = React.createClass({
 });
 
 var EmailAddressInput = React.createClass({
-    getInitialState: function () {
+    getInitialState() {
         return {
             value: "",
             state: "VALID",
             error_msg: ""
         }
     },
-    validateInput: function(e) {
+    validateInput: function (e) {
         var email = e.target.value;
         this.setState({value: email});
 
         var re = /\S+@\S+\.\S+/;
         var dom = this.refs.help.getDOMNode();
-        if(email === "" || !re.test(email)) {
+        if (email === "" || !re.test(email)) {
             dom.innerHTML = "You must enter an email address!";
         }
-        else if(email.length > 60) {
+        else if (email.length > 60) {
             dom.innerHTML = "You've entered an email address that is too long (>60 characters)";
         }
         else {
             dom.innerHTML = "";
         }
     },
-    render: function () {
+    render() {
         return (
             <div className="email-address-widget">
                 <h4>Where can we send the URL</h4>
