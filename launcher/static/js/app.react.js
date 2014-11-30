@@ -1,6 +1,9 @@
 var STATIC_URL = window.STATIC_URL;
 
 var DeployerWidget = React.createClass({
+    propTypes: {
+        projects: React.PropTypes.array
+    },
     render: function () {
         return (
             <div id="central-widget">
@@ -19,6 +22,9 @@ var DeployerWidget = React.createClass({
 });
 
 var ProjectSelectWidget = React.createClass({
+    propTypes: {
+        projects: React.PropTypes.array
+    },
     render: function () {
         return (
             <select name="project" id="project_select" className="form-control">
@@ -31,6 +37,9 @@ var ProjectSelectWidget = React.createClass({
 });
 
 var ProjectItem = React.createClass({
+    propTypes: {
+        project: React.PropTypes.object
+    },
     render: function () {
         return (
             <option value={this.props.project.resource_uri}>{this.props.project.name}</option>
@@ -68,7 +77,6 @@ var EmailAddressInput = React.createClass({
                 <h4>Where can we send the URL</h4>
                 <div
                     className = "form-group" >
-
                     <div className="input-group">
                         <span className="input-group-addon">
                             <span className="glyphicon glyphicon-envelope"></span>
