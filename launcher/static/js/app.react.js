@@ -1,5 +1,7 @@
 var STATIC_URL = window.STATIC_URL;
 
+/* MAIN VIEW */
+
 var DeployerWidget = React.createClass({
     propTypes: {
         projects: React.PropTypes.array
@@ -47,6 +49,14 @@ var ProjectItem = React.createClass({
     }
 });
 
+var ValidationMessage = React.createClass({
+    render() {
+        return (
+            <span className = "help-block" ref="help">{this.props.message}</span>
+        );
+    }
+});
+
 var EmailAddressInput = React.createClass({
     getInitialState() {
         return {
@@ -57,26 +67,30 @@ var EmailAddressInput = React.createClass({
     },
     validateInput: function (e) {
         var email = e.target.value;
-        this.setState({value: email});
-
         var re = /\S+@\S+\.\S+/;
-        var dom = this.refs.help.getDOMNode();
         if (email === "" || !re.test(email)) {
-            dom.innerHTML = "You must enter an email address!";
+            this.setState({value: email, state: "INVALID", error_msg: "You must enter an email address!"});
         }
         else if (email.length > 60) {
-            dom.innerHTML = "You've entered an email address that is too long (>60 characters)";
+            this.setState({
+                value: email,
+                state: "INVALID",
+                error_msg: "You've entered an email address that is too long (>60 characters)"
+            });
         }
         else {
-            dom.innerHTML = "";
+            this.setState({
+                value: email,
+                state: "VALID",
+                error_msg: ""
+            });
         }
     },
     render() {
         return (
             <div className="email-address-widget">
                 <h4>Where can we send the URL</h4>
-                <div
-                    className = "form-group" >
+                <div className="form-group">
                     <div className="input-group">
                         <span className="input-group-addon">
                             <span className="glyphicon glyphicon-envelope"></span>
@@ -87,12 +101,10 @@ var EmailAddressInput = React.createClass({
                             className="form-control"
                             onChange={this.validateInput}
                             id="email_input"
-                            ref="dinamo"
                             placeholder="name@domain.com"
                         />
                     </div>
-                    < span
-                        className = "help-block" ref="help"> </span>
+                    <ValidationMessage message={this.state.error_msg} />
                 </div>
             </div>
         )
