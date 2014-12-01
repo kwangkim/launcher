@@ -62,7 +62,7 @@ class Project(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.id:
+        if not self.id and not self.slug:
             self.slug = slugify(self.name)
         self.full_clean()
         super(Project, self).save(*args, **kwargs)
