@@ -67,18 +67,18 @@ class ProjectModelTests(SimpleTestCase):
 
     def test_env_vars(self):
         self.project.env_vars = ''
-        self.assertDictEqual(self.project.env_var_dict, {})
+        self.assertDictEqual(self.project.env_vars_dict, {})
 
         self.project.env_vars = '   key=val  '
-        self.assertDictEqual(self.project.env_var_dict, {'key': 'val'})
+        self.assertDictEqual(self.project.env_vars_dict, {'key': 'val'})
 
         self.project.env_vars = '   key=val  key2=val2'
-        self.assertDictEqual(self.project.env_var_dict, {'key': 'val',
+        self.assertDictEqual(self.project.env_vars_dict, {'key': 'val',
                                                          'key2': 'val2'})
 
         self.project.env_vars = '   key=val  key2=val2  key3=  '
         with self.assertRaises(ValueError):
-            self.project.env_var_dict
+            self.project.env_vars_dict
 
     def test_env_vars_validation(self):
         self.project.ports = '80'  # required by Project.full_clean()

@@ -76,7 +76,7 @@ class Project(models.Model):
         return [hostname for hostname in self.hostnames.split(' ') if hostname]
 
     @property
-    def env_var_dict(self):
+    def env_vars_dict(self):
         d = {}
         for pair in self.env_vars.split(' '):
             if not pair:
@@ -101,7 +101,7 @@ class Project(models.Model):
             if len(port_list) != len(hostname_list):
                 raise ValidationError({'hostnames': ['The number of hostnames has to match the number of ports.']})
         try:
-            self.env_var_dict
+            self.env_vars_dict
         except ValueError:
             raise ValidationError({'env_vars': ['This string has an incorrect format.']})
 
