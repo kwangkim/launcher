@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 import intercom
 import pusher
@@ -61,9 +62,49 @@ class Project(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.id:
+        if not self.id and not self.slug:
             self.slug = slugify(self.name)
+        self.full_clean()
         super(Project, self).save(*args, **kwargs)
+
+    @property
+    def port_list(self):
+        return [int(port) for port in self.ports.split(' ') if port]
+
+    @property
+    def hostname_list(self):
+        return [hostname for hostname in self.hostnames.split(' ') if hostname]
+
+    @property
+    def env_vars_dict(self):
+        d = {}
+        for pair in self.env_vars.split(' '):
+            if not pair:
+                continue
+            key, equals, value = pair.partition('=')
+            if not key or not value or equals != '=':
+                raise ValueError
+            d[key] = value
+        return d
+
+    def clean(self):
+        try:
+            port_list = self.port_list
+        except ValueError:
+            raise ValidationError({'ports': ['Invalid port(s).']})
+        hostname_list = self.hostname_list
+        assert len(port_list) > 0
+        if len(port_list) == 1:
+            if hostname_list:
+                raise ValidationError({'hostnames': ['You cannot specify hostnames as there is only one forwarded port.']})
+        else:
+            if len(port_list) != len(hostname_list):
+                raise ValidationError({'hostnames': ['The number of hostnames has to match the number of ports.']})
+        try:
+            self.env_vars_dict
+        except ValueError:
+            raise ValidationError({'env_vars': ['This string has an incorrect format.']})
+
 
     def landing_page_url(self):
         return reverse('landing_page', kwargs={'slug': self.slug})
@@ -163,19 +204,16 @@ class Deployment(models.Model):
             'X-Service-Key': settings.SHIPYARD_KEY
         }
         # run the container
-        ports = self.project.ports.split(' ')
-        if self.project.env_vars:
-            env_vars = dict(item.split("=") for item in self.project.env_vars.split(" "))
-        else:
-            env_vars = {}
-        bind_ports = [{"proto": "tcp", "container_port": int(port)} for port in ports]
+        env_vars_dict = self.project.env_vars_dict
+        port_list = self.project.port_list
+        bind_ports = [{"proto": "tcp", "container_port": port} for port in port_list]
         if "edx" in self.project.name.lower():
-            env_vars["EDX_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["EDX_PREVIEW_LMS_BASE"] = "preview.lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["EDX_CMS_BASE"] = "cms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["INTERCOM_APP_ID"] = "{0}".format(settings.INTERCOM_EDX_APP_ID)
-            env_vars["INTERCOM_APP_SECRET"] = "{0}".format(settings.INTERCOM_EDX_APP_SECRET)
-            env_vars["INTERCOM_USER_EMAIL"] = "{0}".format(self.email)
+            env_vars_dict["EDX_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars_dict["EDX_PREVIEW_LMS_BASE"] = "preview.lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars_dict["EDX_CMS_BASE"] = "cms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars_dict["INTERCOM_APP_ID"] = settings.INTERCOM_EDX_APP_ID
+            env_vars_dict["INTERCOM_APP_SECRET"] = settings.INTERCOM_EDX_APP_SECRET
+            env_vars_dict["INTERCOM_USER_EMAIL"] = self.email
 
         payload = {
             "name": self.project.image_name,
@@ -185,7 +223,7 @@ class Deployment(models.Model):
             "container_name": self.deploy_id,
             "hostname": self.deploy_id,
             "labels": ["dev"],
-            "environment": env_vars,
+            "environment": env_vars_dict,
             "bind_ports": bind_ports
         }
         r = requests.post(
@@ -203,19 +241,20 @@ class Deployment(models.Model):
                 'percent': 75
             })
             time.sleep(7)
-            domains = []
             docker_server = urlparse(response[0]['engine']['addr'])
             docker_server_ip = docker_server.hostname
-            for hostname in self.project.hostnames.split(" "):
-                if hostname:
+            domains = []
+            hostname_list = self.project.hostname_list
+            if not hostname_list:
+                domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
+            else:
+                for hostname in hostname_list:
                     domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
-                else:
-                    domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
             # maps internal container ports to domains
-            port_domain_mapping = {int(port): domain for port, domain in zip(ports, domains)}
+            port_domain_mapping = {port: domain for port, domain in zip(port_list, domains)}
             # maps internal container ports to public ports (for example: 80 -> 49302)
             public_container_port_mapping = {port["container_port"]: port["port"] for port in response[0]["ports"]}
-            scheme = "https" if "443" in self.project.ports else "http"
+            scheme = "https" if 443 in port_list else "http"
             app_urls = []
             r = redis.StrictRedis(host=settings.HIPACHE_REDIS_IP, port=settings.HIPACHE_REDIS_PORT, db=0)
             for internal_port, public_port in public_container_port_mapping.items():
