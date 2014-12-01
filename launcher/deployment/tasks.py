@@ -21,8 +21,12 @@ logger = get_task_logger(__name__)
 
 @app.task
 def deploy(deploy_instance):
-    logger.info(u"Deploying | {0.project.name}: {0.deploy_id} for {0.email}".format(deploy_instance))
-    deploy_instance.deploy()
+    deployment_info = "{0.project.name}: {0.deploy_id} for {0.email}".format(deploy_instance)
+    logger.info(u"Deploying | {}".format(deployment_info))
+    try:
+        deploy_instance.deploy()
+    except:
+        logger.exception('Deployment failed: {}'.format(deployment_info))
 
 
 @app.task
