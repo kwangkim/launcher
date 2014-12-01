@@ -1,10 +1,10 @@
 from django.core.exceptions import ValidationError
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
 from .models import Project
 
 
-class ProjectModelTests(SimpleTestCase):
+class ProjectModelUnitTests(SimpleTestCase):
     def setUp(self):
         self.project = Project(name='Big Project',
                                github_url='http://github.com/BigProject.git',
@@ -99,3 +99,20 @@ class ProjectModelTests(SimpleTestCase):
         self.project.env_vars = '   key=val  key2=val2  key3=  key4=1234'
         with self.assertRaisesMessage(ValidationError, "{'env_vars': [u'This string has an incorrect format.']}"):
             self.project.full_clean()
+
+
+class ProjectModelTests(TestCase):
+    def test_setting_slug(self):
+        project = Project(name='Big Project',
+                          github_url='http://github.com/BigProject.git',
+                          image_name='appsembler/big-project',
+                          ports='80')
+        self.assertIsNone(project.slug)
+        project.save()
+        self.assertEqual(project.slug, 'big-project')
+        project.name = 'Other Big Project'
+        project.save()
+        # Slug shouldn't change
+        self.assertEqual(project.slug, 'big-project')
+
+
