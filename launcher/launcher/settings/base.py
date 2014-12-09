@@ -249,6 +249,7 @@ BOWER_INSTALLED_APPS = (
     'json2',
     'kbwood_countdown#1.6.2',
     'bootstrap#3.1.1',
+    'superagent#0.21.0'
 )
 
 # Django Pipeline config
@@ -273,6 +274,7 @@ PIPELINE_JS = {
             'jquery/jquery.js',
             'json2/json2.js',
             'underscore/underscore.js',
+            'superagent/superagent.js',
             'backbone/backbone.js',
             'bootstrap/dist/js/bootstrap.js',
         ),

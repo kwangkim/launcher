@@ -6,10 +6,52 @@ var DeployerWidget = React.createClass({
     propTypes: {
         projects: React.PropTypes.array
     },
+    getInitialState() {
+        return {
+            project: {}
+        };
+    },
+    setProject(e) {
+      console.log(e.target.project);
+    },
+    submitForm: function(e) {
+        e.preventDefault();
+        app_data = this.state.project;
+        //if (app_data.survey_url !== "") {
+        //    window.open(app_data.survey_url, null, 'height=1204, width=680, toolbar=0, location=0, status=1, scrollbars=1, resizable=1');
+        //}
+        var project_uri = app_data['project_uri'];
+        var app_name = app_data['app_name'];
+        var email = this.$('input[name=email]').val();
+        // creates a deployment app name from the project name and random characters
+        var deploy_id = app_name.toLowerCase() + Math.random().toString().substr(2,6);
+        deploy_id = deploy_id.replace(/[. -]/g, '');
+
+        //window.Intercom('boot', {
+        //        app_id: App.INTERCOM_APP_ID,
+        //        email: email,
+        //        user_agent_data: navigator.userAgent
+        //    }
+        //);
+        request
+            .post('/api/v1/deployments/')
+            .send({
+                project: project_uri,
+                email: email,
+                deploy_id: deploy_id
+            })
+            .end(function(res){
+                if (res.ok) {
+                    alert('yay got ' + JSON.stringify(res.body));
+                } else {
+                    alert('Oh no! error ' + res.text);
+                }
+            });
+    },
     render() {
         return (
             <div id="central-widget">
-                <form className="form-deploy" method="post">
+                <form className="form-deploy" method="post" onSubmit={this.submitForm}>
                     <a href="http://www.appsembler.com" id="appsembler-logo">
                         <img src={STATIC_URL + "img/appsembler_logo.png"} alt="Appsembler logo" />
                     </a>
@@ -42,9 +84,13 @@ var ProjectItem = React.createClass({
     propTypes: {
         project: React.PropTypes.object
     },
+    selectProject(e) {
+        console.log(e);
+        console.log(this.props.project);
+    },
     render() {
         return (
-            <option value={this.props.project.resource_uri}>{this.props.project.name}</option>
+            <option value={this.props.project.resource_uri} onChange={this.selectProject} data-project={this.props.project}>{this.props.project.name}</option>
         );
     }
 });
