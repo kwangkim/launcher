@@ -1,5 +1,8 @@
 ---
 
+- name: Stop&remove the existing Hipache container, if there is one
+  docker: image=tutum/hipache name=hipache state=absent
+
 - name: Pull the Hipache image
   docker_pull: repo={{item.image_name}} tag={{item.tag}}
   with_items:
