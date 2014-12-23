@@ -44,13 +44,15 @@ def get_app_container_routing_data(deployment_instance, shipyard_response, deplo
     return routing_data, app_urls
 
 
-def get_status_page_routing_data(deployment_instance, deployment_domain):
+def get_status_page_routing_data(deployment_instance, deployment_domain, launcher_ip=None):
     """Prepares data required to set up Hipache-Redis/nginx redirection to the app's status page.
 
     :param deployment_instance: Deployment model instance
     :param deployment_domain: e.g. demo.dev for local setup
     :return: Routing data which can be used in HipacheRedisRouter.add_routes() call
     """
+    if not launcher_ip:
+        launcher_ip = settings.LAUNCHER_IP
     hostname_list = deployment_instance.project.hostname_list
     domains = []
     if hostname_list:
@@ -67,7 +69,7 @@ def get_status_page_routing_data(deployment_instance, deployment_domain):
         # TODO: Both IP & port should be passed here from the outside!
         #       `:8002` should match nginx.conf
         routing_data.append([key, deployment_instance.deploy_id, "{0}://{1}:8002".format(
-            deployment_instance.project.scheme, os.environ['LAUNCHER_IP'])])
+            deployment_instance.project.scheme, launcher_ip)])
 
     return routing_data
 
