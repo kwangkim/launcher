@@ -75,15 +75,13 @@ def get_status_page_routing_data(deployment_instance, deployment_domain):
 class HipacheRedisRouter(object):
     def __init__(self, host=settings.HIPACHE_REDIS_IP, port=settings.HIPACHE_REDIS_PORT, db=0):
         self.redis_instance = redis.StrictRedis(host=host, port=port, db=db)
-        # https://github.com/andymccurdy/redis-py#pipelines
-        self.pipe = self.redis_instance.pipeline()
 
     def add_routes(self, routing_data):
+        # https://github.com/andymccurdy/redis-py#pipelines
+        pipe = self.redis_instance.pipeline()
         for key, route_id, route_url in routing_data:
-            self.pipe.delete(key).rpush(key, route_id, route_url)
-
-    def commit(self):
-        self.pipe.execute()
+            pipe.delete(key).rpush(key, route_id, route_url)
+        pipe.execute()
 
 
 class ShipyardWrapper(object):

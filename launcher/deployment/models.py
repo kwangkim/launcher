@@ -252,9 +252,7 @@ class Deployment(models.Model):
                 deployment_instance=self,
                 shipyard_response=response,
                 deployment_domain=settings.DEMO_APPS_CUSTOM_DOMAIN)
-            redis_router = deployment_utils.HipacheRedisRouter()
-            redis_router.add_routes(routing_data=routing_data)
-            redis_router.commit()
+            deployment_utils.HipacheRedisRouter().add_routes(routing_data=routing_data)
 
             logger_instance.info(u"...Hipache/Redis routes created | {}\n......{}".format(
                 self.description, str(routing_data)))
@@ -327,9 +325,7 @@ class Deployment(models.Model):
 
         routing_data = deployment_utils.get_status_page_routing_data(
             deployment_instance=self, deployment_domain=settings.DEMO_APPS_CUSTOM_DOMAIN)
-        redis_router = deployment_utils.HipacheRedisRouter()
-        redis_router.add_routes(routing_data=routing_data)
-        redis_router.commit()
+        deployment_utils.HipacheRedisRouter().add_routes(routing_data=routing_data)
 
         logger_instance.info(u"...updated Hipache/Redis routes | {}\n......{}".format(
             self.description, str(routing_data)))
@@ -357,9 +353,7 @@ class Deployment(models.Model):
             deployment_instance=self,
             shipyard_response=[response.json()],
             deployment_domain=settings.DEMO_APPS_CUSTOM_DOMAIN)
-        redis_router = deployment_utils.HipacheRedisRouter()
-        redis_router.add_routes(routing_data=routing_data)
-        redis_router.commit()
+        deployment_utils.HipacheRedisRouter().add_routes(routing_data=routing_data)
 
         logger_instance.info(u"...restored Hipache/Redis routes | {}\n......{}".format(
             self.description, str(routing_data)))
