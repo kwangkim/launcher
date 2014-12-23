@@ -1,6 +1,5 @@
 import datetime
 import dateutil.relativedelta
-import json
 import logging
 import time
 
@@ -15,7 +14,6 @@ from django.core.exceptions import ValidationError
 
 import intercom
 import pusher
-import requests
 from allauth.account.models import EmailAddress
 from customerio import CustomerIO
 from model_utils.fields import StatusField
@@ -211,10 +209,6 @@ class Deployment(models.Model):
             'message': "Creating a new container...",
             'percent': 30
         })
-        headers = {
-            'content-type': 'application/json',
-            'X-Service-Key': settings.SHIPYARD_KEY
-        }
         # run the container
         env_vars_dict = self.project.env_vars_dict
         port_list = self.project.port_list
@@ -241,11 +235,7 @@ class Deployment(models.Model):
         }
         logger_instance.info(u"Creating Shipyard container... | {}".format(self.description))
 
-        r = requests.post(
-            "{0}/api/containers".format(settings.SHIPYARD_HOST),
-            data=json.dumps(payload),
-            headers=headers
-        )
+        r = deployment_utils.ShipyardWrapper().deploy(payload=payload)
         if r.status_code == 201:
             logger_instance.info(u"...Shipyard container created | {}".format(self.description))
             response = r.json()
@@ -326,14 +316,7 @@ class Deployment(models.Model):
     def expire(self, logger_instance):
         logger_instance.info(u"Deleting expired app | {}".format(self.description))
 
-        headers = {'X-Service-Key': settings.SHIPYARD_KEY}
-        response = requests.get(
-            "{0}/api/containers/{1}/stop".format(
-                settings.SHIPYARD_HOST,
-                self.remote_container_id,
-            ),
-            headers=headers
-        )
+        response = deployment_utils.ShipyardWrapper().stop(container_id=self.remote_container_id)
         if response.status_code != 204:
             logger_instance.error(u"...NOT deleted expired app | {}".format(self.description))
             return
@@ -353,14 +336,8 @@ class Deployment(models.Model):
 
     def restore(self, logger_instance):
         logger_instance.info(u"Restoring expired app | {}".format(self.description))
-        headers = {'X-Service-Key': settings.SHIPYARD_KEY}
-        response = requests.get(
-            "{0}/api/containers/{1}/restart".format(
-                settings.SHIPYARD_HOST,
-                self.remote_container_id,
-            ),
-            headers=headers
-        )
+
+        response = deployment_utils.ShipyardWrapper().restart(container_id=self.remote_container_id)
         if response.status_code != 204:
             logger_instance.error(u"...NOT restored expired app | {}".format(self.description))
             return
@@ -371,13 +348,7 @@ class Deployment(models.Model):
 
         logger_instance.info(u"Restoring routes | {}".format(self.description))
 
-        response = requests.get(
-            "{0}/api/containers/{1}".format(
-                settings.SHIPYARD_HOST,
-                self.remote_container_id,
-            ),
-            headers=headers
-        )
+        response = deployment_utils.ShipyardWrapper().inspect(container_id=self.remote_container_id)
         if response.status_code != 200:
             logger_instance.error(u"...NOT restored routes | {}".format(self.description))
             return

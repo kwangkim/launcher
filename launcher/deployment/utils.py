@@ -1,6 +1,8 @@
+import json
 import os
 from urlparse import urlparse
 import redis
+import requests
 from django.conf import settings
 
 
@@ -84,5 +86,30 @@ class HipacheRedisRouter(object):
         self.pipe.execute()
 
 
+class ShipyardWrapper(object):
+    def __init__(self, shipyard_host=settings.SHIPYARD_HOST, shipyard_key=settings.SHIPYARD_KEY):
+        self.shipyard_host = shipyard_host
+        self.shipyard_key = shipyard_key
 
+    def deploy(self, payload):
+        headers = {'X-Service-Key': self.shipyard_key,
+                   'content-type': 'application/json'}
+        response = requests.post("{0}/api/containers".format(self.shipyard_host),
+                                 data=json.dumps(payload),
+                                 headers=headers)
+        return response
 
+    def _get_request(self, action, container_id):
+        headers = {'X-Service-Key': self.shipyard_key}
+        response = requests.get("{0}/api/containers/{1}{2}".format(self.shipyard_host, container_id, action),
+                                headers=headers)
+        return response
+
+    def restart(self, container_id):
+        return self._get_request(action='/restart', container_id=container_id)
+
+    def stop(self, container_id):
+        return self._get_request(action='/stop', container_id=container_id)
+
+    def inspect(self, container_id):
+        return self._get_request('', container_id=container_id)
