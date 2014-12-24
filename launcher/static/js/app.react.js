@@ -86,6 +86,12 @@ var DeployerStatusWidget = React.createClass({
         this.channel.bind('deployment_complete', this.deploymentSuccess);
         this.channel.bind('deployment_failed', this.deploymentFail);
     },
+    updateInfoStatus(data) {
+        this.setState({
+            statusMessage: data.message,
+            percent: data.percent
+        })
+    },
     render() {
         var style = {
             width: this.state.percent + '%'
