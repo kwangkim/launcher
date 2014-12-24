@@ -22,3 +22,5 @@ DATABASES = {
         'PORT': '',                      # Set to empty string for default.
     }
 }
+
+CELERY_ALWAYS_EAGER = False
