@@ -1,4 +1,6 @@
 var STATIC_URL = window.STATIC_URL;
+var request = window.superagent;
+var pusher;
 
 /* MAIN VIEW */
 
@@ -11,18 +13,21 @@ var DeployerWidget = React.createClass({
             project: {}
         };
     },
-    setProject(e) {
-      console.log(e.target.project);
+    componentDidMount: function() {
+
     },
     submitForm: function(e) {
         e.preventDefault();
-        app_data = this.state.project;
+        pusher = new Pusher('cea6dff5fc1f38a2d45d');
+        var project_id = parseInt($('select[name=project]').val());
+        var project = _.where(apps, {id: project_id})[0];
+        this.setState({project: project });
         //if (app_data.survey_url !== "") {
         //    window.open(app_data.survey_url, null, 'height=1204, width=680, toolbar=0, location=0, status=1, scrollbars=1, resizable=1');
         //}
-        var project_uri = app_data['project_uri'];
-        var app_name = app_data['app_name'];
-        var email = this.$('input[name=email]').val();
+        var project_uri = project.resource_uri;
+        var app_name = project.name;
+        var email = $('input[name=email]').val();
         // creates a deployment app name from the project name and random characters
         var deploy_id = app_name.toLowerCase() + Math.random().toString().substr(2,6);
         deploy_id = deploy_id.replace(/[. -]/g, '');
@@ -34,18 +39,18 @@ var DeployerWidget = React.createClass({
         //    }
         //);
         request
-            .post('/api/v1/deployments/')
+            .post('http://127.0.0.1:8000/api/v1/deployments/')
             .send({
                 project: project_uri,
                 email: email,
                 deploy_id: deploy_id
             })
             .end(function(res){
-                if (res.ok) {
-                    alert('yay got ' + JSON.stringify(res.body));
-                } else {
-                    alert('Oh no! error ' + res.text);
-                }
+                React.unmountComponentAtNode(document.getElementsByClassName("container")[0]);
+                React.render(
+                    <DeployerStatusWidget deploy_id={deploy_id} />,
+                    document.getElementsByClassName("container")[0]
+                );
             });
     },
     render() {
@@ -62,6 +67,46 @@ var DeployerWidget = React.createClass({
                 </form>
             </div>
         );
+    }
+});
+
+var DeployerStatusWidget = React.createClass({
+    propTypes: {
+        deploy_id: React.PropTypes.string
+    },
+    getInitialState() {
+        return {
+            statusMessage: "Starting deployment...",
+            percent: 5
+        }
+    },
+    componentDidMount() {
+        this.channel = App.pusher.subscribe(this.props.deploy_id);
+        this.channel.bind('info_update', this.updateInfoStatus);
+        this.channel.bind('deployment_complete', this.deploymentSuccess);
+        this.channel.bind('deployment_failed', this.deploymentFail);
+    },
+    render() {
+        var style = {
+            width: this.state.percent + '%'
+        };
+        return (
+            <div id="central-widget">
+                <div className="form-deploy">
+                    <img src="/static/img/ajax-loader.gif" alt="loader" className="spinner" />
+                    <h3>Deploying</h3>
+                    <div className="progress progress-striped active">
+                        <div className="progress-bar" role="progressbar" style={style} aria-valuenow={this.state.percent} aria-valuemin="0" aria-valuemax="100">
+                            <span className="sr-only">{this.state.percent}% Complete</span>
+                        </div>
+                    </div>
+                    <div className="alert alert-info" id="info-message-section">
+                        <span className="glyphicon glyphicon-wrench"></span>
+                        <span id="info-message"> {this.state.statusMessage}</span>
+                    </div>
+                </div>
+            </div>
+        )
     }
 });
 
@@ -90,7 +135,7 @@ var ProjectItem = React.createClass({
     },
     render() {
         return (
-            <option value={this.props.project.resource_uri} onChange={this.selectProject} data-project={this.props.project}>{this.props.project.name}</option>
+            <option value={this.props.project.id} onChange={this.selectProject}>{this.props.project.name}</option>
         );
     }
 });
