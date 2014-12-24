@@ -5,4 +5,4 @@
 
 - include: server.yml
   tags: newrelic_server
-  when: newrelic_server is defined and newrelic_server == true
+  when: newrelic_server is defined and newrelic_server == true and deployment_environment != "vagrant"
