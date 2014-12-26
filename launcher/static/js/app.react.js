@@ -48,7 +48,7 @@ var DeployerWidget = React.createClass({
             .end(function(res){
                 React.unmountComponentAtNode(document.getElementsByClassName("container")[0]);
                 React.render(
-                    <DeployerStatusWidget deploy_id={deploy_id} />,
+                    <DeploymentStatusWidget deployId={deploy_id} appName={app_name} />,
                     document.getElementsByClassName("container")[0]
                 );
             });
@@ -70,21 +70,29 @@ var DeployerWidget = React.createClass({
     }
 });
 
-var DeployerStatusWidget = React.createClass({
+var DeploymentStatusWidget = React.createClass({
     propTypes: {
-        deploy_id: React.PropTypes.string
+        appName: React.PropTypes.string,
+        deployId: React.PropTypes.string
     },
     getInitialState() {
         return {
-            statusMessage: "Starting deployment...",
-            percent: 5
+            percent: 5,
+            statusMessage: "Starting deployment..."
         }
     },
     componentDidMount() {
-        this.channel = App.pusher.subscribe(this.props.deploy_id);
+        this.channel = App.pusher.subscribe(this.props.deployId);
         this.channel.bind('info_update', this.updateInfoStatus);
         this.channel.bind('deployment_complete', this.deploymentSuccess);
         this.channel.bind('deployment_failed', this.deploymentFail);
+    },
+    deploymentSuccess(data) {
+        React.unmountComponentAtNode(document.getElementsByClassName("container")[0]);
+        React.render(
+            <DeploymentSuccessWidget appInfo={data} />,
+            document.getElementsByClassName("container")[0]
+        );
     },
     updateInfoStatus(data) {
         this.setState({
@@ -93,25 +101,66 @@ var DeployerStatusWidget = React.createClass({
         })
     },
     render() {
-        var style = {
-            width: this.state.percent + '%'
-        };
         return (
             <div id="central-widget">
                 <div className="form-deploy">
                     <img src="/static/img/ajax-loader.gif" alt="loader" className="spinner" />
-                    <h3>Deploying</h3>
-                    <div className="progress progress-striped active">
-                        <div className="progress-bar" role="progressbar" style={style} aria-valuenow={this.state.percent} aria-valuemin="0" aria-valuemax="100">
-                            <span className="sr-only">{this.state.percent}% Complete</span>
-                        </div>
-                    </div>
+                    <h3>Deploying {this.props.appName}</h3>
+                    <ProgressBar percent={this.state.percent} />
                     <div className="alert alert-info" id="info-message-section">
                         <span className="glyphicon glyphicon-wrench"></span>
                         <span id="info-message"> {this.state.statusMessage}</span>
                     </div>
                 </div>
             </div>
+        )
+    }
+});
+
+var DeploymentSuccessWidget = React.createClass({
+    propTypes: {
+        appInfo: React.PropTypes.object,
+        statusMessage: React.PropTypes.object
+    },
+    render() {
+        var hasAuthInfo = this.props.appInfo.username || this.props.appInfo.password;
+        return (
+            <div id="central-widget">
+                <div className="form-deploy">
+                    <h3>Deployed {this.props.appInfo.app_name}</h3>
+                    <div className="alert alert-success" id="info-message-section">
+                        <span className="glyphicon glyphicon-ok"></span>
+                        <span id="info-message"> {this.props.appInfo.message}</span>
+                    </div>
+                    {this.props.appInfo.app_url.split(" ").map(function (url) {
+                        return <p><a className="app-url" href={url}>{url}</a></p>
+                    })}
+                    {hasAuthInfo ?
+                        <div className="alert alert-info auth-details">Authentication details<br/>
+                            <strong>Username:</strong> {this.props.appInfo.username}<br />
+                            <strong>Password:</strong> {this.props.appInfo.password}
+                        </div>
+                        : null}
+                </div>
+            </div>
+        )
+    }
+});
+
+var ProgressBar = React.createClass({
+    propTypes: {
+        percent: React.PropTypes.number
+    },
+    render() {
+        var style = {
+            width: this.props.percent + '%'
+        };
+        return (
+        <div className="progress progress-striped active">
+            <div className="progress-bar" role="progressbar" style={style} aria-valuenow={this.props.percent} aria-valuemin="0" aria-valuemax="100">
+                <span className="sr-only">{this.props.percent}% Complete</span>
+            </div>
+        </div>
         )
     }
 });
