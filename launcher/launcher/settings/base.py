@@ -249,7 +249,6 @@ BOWER_INSTALLED_APPS = (
     'json2',
     'kbwood_countdown#1.6.2',
     'bootstrap#3.1.1',
-    'superagent#0.21.0'
 )
 
 # Django Pipeline config
