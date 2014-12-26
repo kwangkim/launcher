@@ -19,12 +19,15 @@ var DeployerWidget = React.createClass({
     submitForm: function(e) {
         e.preventDefault();
         pusher = new Pusher('cea6dff5fc1f38a2d45d');
+        // get project info from array
         var project_id = parseInt($('select[name=project]').val());
         var project = _.where(apps, {id: project_id})[0];
         this.setState({project: project });
-        //if (app_data.survey_url !== "") {
-        //    window.open(app_data.survey_url, null, 'height=1204, width=680, toolbar=0, location=0, status=1, scrollbars=1, resizable=1');
-        //}
+
+        //show survey if it exists
+        if (project.survey_url !== "") {
+            window.open(app_data.survey_url, null, 'height=1204, width=680, toolbar=0, location=0, status=1, scrollbars=1, resizable=1');
+        }
         var project_uri = project.resource_uri;
         var app_name = project.name;
         var email = $('input[name=email]').val();
@@ -32,12 +35,12 @@ var DeployerWidget = React.createClass({
         var deploy_id = app_name.toLowerCase() + Math.random().toString().substr(2,6);
         deploy_id = deploy_id.replace(/[. -]/g, '');
 
-        //window.Intercom('boot', {
-        //        app_id: App.INTERCOM_APP_ID,
-        //        email: email,
-        //        user_agent_data: navigator.userAgent
-        //    }
-        //);
+        window.Intercom('boot', {
+                app_id: App.INTERCOM_APP_ID,
+                email: email,
+                user_agent_data: navigator.userAgent
+            }
+        );
         request
             .post('http://127.0.0.1:8000/api/v1/deployments/')
             .send({
