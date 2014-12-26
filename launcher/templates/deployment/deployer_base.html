@@ -3,7 +3,7 @@
 {% load static from staticfiles %}
 
 {% block extra_js %}
-    <script src="http://js.pusher.com/2.1/pusher.min.js"></script>
+    <script src="//js.pusher.com/2.2/pusher.min.js"></script>
     {% compressed_js 'app' %}
     <script>
       apps = {{ apps|safe }};
