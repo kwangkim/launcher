@@ -18,6 +18,10 @@ var DeployerWidget = React.createClass({
     },
     submitForm: function(e) {
         e.preventDefault();
+        if (! this.refs.emailInputWidget.validateInput()) {
+            return false;
+        }
+
         pusher = new Pusher('cea6dff5fc1f38a2d45d');
         // get project info from array
         var project_id = parseInt($('select[name=project]').val());
@@ -71,7 +75,7 @@ var DeployerWidget = React.createClass({
                     </a>
                     <h3 className="form-deploy-heading">Pick a project:</h3>
                     <ProjectSelectWidget projects={this.props.projects} />
-                    <EmailAddressInput />
+                    <EmailAddressInput ref="emailInputWidget" />
                     <button className="btn btn-success" type="submit">Launch demo site</button>
                 </form>
             </div>
@@ -240,33 +244,46 @@ var ValidationMessage = React.createClass({
 var EmailAddressInput = React.createClass({
     getInitialState() {
         return {
-            value: "",
             state: "VALID",
-            error_msg: ""
+            error_msg: "",
+            validated: false
         }
     },
-    validateInput: function (e) {
-        var email = e.target.value;
-        var re = /\S+@\S+\.\S+/;
+    validateOnChange(e) {
+        // only run on change if the validation has been run (and has failed)
+        if (this.state.validated) {
+            this.validateInput(e);
+        }
+    },
+    validateInput(e) {
+        var email = this.refs.emailInput.getDOMNode().value;
+        var re = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
         if (email === "" || !re.test(email)) {
-            this.setState({value: email, state: "INVALID", error_msg: "You must enter an email address!"});
+            this.setState({
+                state: "INVALID",
+                error_msg: "You must enter an email address!",
+                validated: true
+            });
+            return false;
         }
         else if (email.length > 60) {
             this.setState({
-                value: email,
                 state: "INVALID",
-                error_msg: "You've entered an email address that is too long (>60 characters)"
+                error_msg: "You've entered an email address that is too long (>60 characters)",
+                validated: true
             });
+            return false;
         }
         else {
             this.setState({
-                value: email,
                 state: "VALID",
-                error_msg: ""
+                error_msg: "",
+                validated: true
             });
+            return true;
         }
     },
-    render() {
+    render(){
         return (
             <div className="email-address-widget">
                 <h4>Where can we send the URL</h4>
@@ -279,9 +296,10 @@ var EmailAddressInput = React.createClass({
                             type="text"
                             name="email"
                             className="form-control"
-                            onChange={this.validateInput}
+                            onChange={this.validateOnChange}
                             id="email_input"
                             placeholder="name@domain.com"
+                            ref="emailInput"
                         />
                     </div>
                     <ValidationMessage message={this.state.error_msg} />
