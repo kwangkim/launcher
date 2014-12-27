@@ -25,8 +25,8 @@ var DeployerWidget = React.createClass({
         this.setState({project: project });
 
         //show survey if it exists
-        if (project.survey_url !== "") {
-            window.open(app_data.survey_url, null, 'height=1204, width=680, toolbar=0, location=0, status=1, scrollbars=1, resizable=1');
+        if (project.survey_form_url !== "") {
+            window.open(project.survey_form_url, null, 'height=1204, width=680, toolbar=0, location=0, status=1, scrollbars=1, resizable=1');
         }
         var project_uri = project.resource_uri;
         var app_name = project.name;
@@ -85,7 +85,7 @@ var DeploymentStatusWidget = React.createClass({
         }
     },
     componentDidMount() {
-        this.channel = App.pusher.subscribe(this.props.deployId);
+        this.channel = pusher.subscribe(this.props.deployId);
         this.channel.bind('info_update', this.updateInfoStatus);
         this.channel.bind('deployment_complete', this.deploymentSuccess);
         this.channel.bind('deployment_failed', this.deploymentFail);
