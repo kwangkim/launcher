@@ -49,9 +49,15 @@ var DeployerWidget = React.createClass({
                 deploy_id: deploy_id
             })
             .end(function(res){
+                var statusComponent;
+                if (res.ok) {
+                    statusComponent = <DeploymentStatusWidget deployId={deploy_id} appName={app_name} />;
+                } else {
+                    statusComponent = <DeploymentFailedWidget statusMessage={res.text} />;
+                }
                 React.unmountComponentAtNode(document.getElementsByClassName("container")[0]);
                 React.render(
-                    <DeploymentStatusWidget deployId={deploy_id} appName={app_name} />,
+                    statusComponent,
                     document.getElementsByClassName("container")[0]
                 );
             });
@@ -90,6 +96,13 @@ var DeploymentStatusWidget = React.createClass({
         this.channel.bind('deployment_complete', this.deploymentSuccess);
         this.channel.bind('deployment_failed', this.deploymentFail);
     },
+    deploymentFail(data) {
+        React.unmountComponentAtNode(document.getElementsByClassName("container")[0]);
+        React.render(
+            <DeploymentFailedWidget statusMessage={data.message} />,
+            document.getElementsByClassName("container")[0]
+        );
+    },
     deploymentSuccess(data) {
         React.unmountComponentAtNode(document.getElementsByClassName("container")[0]);
         React.render(
@@ -123,7 +136,6 @@ var DeploymentStatusWidget = React.createClass({
 var DeploymentSuccessWidget = React.createClass({
     propTypes: {
         appInfo: React.PropTypes.object,
-        statusMessage: React.PropTypes.object
     },
     render() {
         var hasAuthInfo = this.props.appInfo.username || this.props.appInfo.password;
@@ -144,6 +156,25 @@ var DeploymentSuccessWidget = React.createClass({
                             <strong>Password:</strong> {this.props.appInfo.password}
                         </div>
                         : null}
+                </div>
+            </div>
+        )
+    }
+});
+
+var DeploymentFailedWidget = React.createClass({
+    propTypes: {
+        statusMessage: React.PropTypes.string
+    },
+    render() {
+        return (
+            <div id="central-widget">
+                <div className="form-deploy">
+                    <h3>Deployment failed!</h3>
+                    <div className="alert alert-danger" id="info-message-section">
+                        <span className="glyphicon glyphicon-remove"></span>
+                        <span id="info-message"> {this.props.statusMessage}</span>
+                    </div>
                 </div>
             </div>
         )
