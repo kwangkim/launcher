@@ -13,12 +13,9 @@ var DeployerWidget = React.createClass({
             project: {}
         };
     },
-    componentDidMount: function() {
-
-    },
-    submitForm: function(e) {
+    submitForm: function (e) {
         e.preventDefault();
-        if (! this.refs.emailInputWidget.validateInput()) {
+        if (!this.refs.emailInputWidget.validateInput()) {
             return false;
         }
 
@@ -26,7 +23,7 @@ var DeployerWidget = React.createClass({
         // get project info from array
         var project_id = parseInt($('select[name=project]').val());
         var project = _.where(apps, {id: project_id})[0];
-        this.setState({project: project });
+        this.setState({project: project});
 
         //show survey if it exists
         if (project.survey_form_url !== "") {
@@ -36,7 +33,7 @@ var DeployerWidget = React.createClass({
         var app_name = project.name;
         var email = $('input[name=email]').val();
         // creates a deployment app name from the project name and random characters
-        var deploy_id = app_name.toLowerCase() + Math.random().toString().substr(2,6);
+        var deploy_id = app_name.toLowerCase() + Math.random().toString().substr(2, 6);
         deploy_id = deploy_id.replace(/[. -]/g, '');
 
         window.Intercom('boot', {
@@ -46,13 +43,13 @@ var DeployerWidget = React.createClass({
             }
         );
         request
-            .post('http://127.0.0.1:8000/api/v1/deployments/')
+            .post('/api/v1/deployments/')
             .send({
                 project: project_uri,
                 email: email,
                 deploy_id: deploy_id
             })
-            .end(function(res){
+            .end(function (res) {
                 var statusComponent;
                 if (res.ok) {
                     statusComponent = <DeploymentStatusWidget deployId={deploy_id} appName={app_name} />;
@@ -152,11 +149,15 @@ var DeploymentSuccessWidget = React.createClass({
                         <span id="info-message"> {this.props.appInfo.message}</span>
                     </div>
                     {this.props.appInfo.app_url.split(" ").map(function (url) {
-                        return <p><a className="app-url" href={url}>{url}</a></p>
+                        return <p>
+                            <a className="app-url" href={url}>{url}</a>
+                        </p>
                     })}
                     {hasAuthInfo ?
-                        <div className="alert alert-info auth-details">Authentication details<br/>
-                            <strong>Username:</strong> {this.props.appInfo.username}<br />
+                        <div className="alert alert-info auth-details">Authentication details
+                            <br/>
+                            <strong>Username:</strong> {this.props.appInfo.username}
+                            <br />
                             <strong>Password:</strong> {this.props.appInfo.password}
                         </div>
                         : null}
@@ -194,11 +195,11 @@ var ProgressBar = React.createClass({
             width: this.props.percent + '%'
         };
         return (
-        <div className="progress progress-striped active">
-            <div className="progress-bar" role="progressbar" style={style} aria-valuenow={this.props.percent} aria-valuemin="0" aria-valuemax="100">
-                <span className="sr-only">{this.props.percent}% Complete</span>
+            <div className="progress progress-striped active">
+                <div className="progress-bar" role="progressbar" style={style} aria-valuenow={this.props.percent} aria-valuemin="0" aria-valuemax="100">
+                    <span className="sr-only">{this.props.percent}% Complete</span>
+                </div>
             </div>
-        </div>
         )
     }
 });
@@ -283,7 +284,7 @@ var EmailAddressInput = React.createClass({
             return true;
         }
     },
-    render(){
+    render() {
         return (
             <div className="email-address-widget">
                 <h4>Where can we send the URL</h4>
