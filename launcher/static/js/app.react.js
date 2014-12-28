@@ -21,7 +21,7 @@ var DeployerWidget = React.createClass({
 
         pusher = new Pusher('cea6dff5fc1f38a2d45d');
         // get project info from array
-        var project_id = parseInt($('select[name=project]').val());
+        var project_id = parseInt(this.refs.projectSelect.getDOMNode().value);
         var project = _.where(apps, {id: project_id})[0];
         this.setState({project: project});
 
@@ -31,10 +31,8 @@ var DeployerWidget = React.createClass({
         }
         var project_uri = project.resource_uri;
         var app_name = project.name;
-        var email = $('input[name=email]').val();
-        // creates a deployment app name from the project name and random characters
-        var deploy_id = app_name.toLowerCase() + Math.random().toString().substr(2, 6);
-        deploy_id = deploy_id.replace(/[. -]/g, '');
+        var email = this.refs.emailInput.getDOMNode().value;
+        var deploy_id = this.createDeployId(app_name);
 
         window.Intercom('boot', {
                 app_id: App.INTERCOM_APP_ID,
@@ -62,6 +60,10 @@ var DeployerWidget = React.createClass({
                     document.getElementsByClassName("container")[0]
                 );
             });
+    },
+    createDeployId(app_name) {
+        // creates a deployment app name from the project name and random characters
+        return app_name.toLowerCase() + Math.random().toString().substr(2, 6).replace(/[. -]/g, '')
     },
     render() {
         return (
@@ -136,7 +138,7 @@ var DeploymentStatusWidget = React.createClass({
 
 var DeploymentSuccessWidget = React.createClass({
     propTypes: {
-        appInfo: React.PropTypes.object,
+        appInfo: React.PropTypes.object
     },
     render() {
         var hasAuthInfo = this.props.appInfo.username || this.props.appInfo.password;
@@ -210,7 +212,7 @@ var ProjectSelectWidget = React.createClass({
     },
     render() {
         return (
-            <select name="project" id="project_select" className="form-control">
+            <select name="project" id="project_select" ref="projectSelect" className="form-control">
                 {this.props.projects.map(function (project) {
                     return <ProjectItem project={project} key={project.id} />;
                 })}
