@@ -13,7 +13,7 @@ celery_workers: 1
 # application config
 app_name: launcher
 git_repo_url: https://github.com/appsembler/launcher.git
-git_repo_branch: feature/shipyard-ansible
+git_repo_branch: develop
 git_repo_dir: /opt/launcher
 venv_dir: /opt/venv/launcher
 
