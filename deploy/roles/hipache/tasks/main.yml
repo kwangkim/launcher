@@ -38,3 +38,12 @@
 
 - name: Insert Shipyard DNS entry in hipache
   command: redis-cli -p 63790 rpush frontend:{{shipyard_url}} launcher http://{{django_env_vars.LAUNCHER_IP}}:8080
+
+- name: Restore app routes
+  django_manage: >
+      command=restore_hipache_routes
+      app_path={{django_project_dir}}
+      settings=launcher.settings.production
+      pythonpath={{django_project_dir}}
+      virtualenv={{venv_dir}}
+  environment: django_env_vars
