@@ -322,6 +322,11 @@ class Deployment(models.Model):
     def expire(self, logger_instance):
         logger_instance.info(u"Deleting expired app | {}".format(self.description))
 
+        if not deployment_utils.ShipyardWrapper().container_exists(response=None,
+                                                                   container_id=self.remote_container_id):
+            logger_instance.error(u"...app container does NOT exist! | {}".format(self.description))
+            return
+
         response = deployment_utils.ShipyardWrapper().stop(container_id=self.remote_container_id)
         if response.status_code != 204:
             logger_instance.error(u"...NOT deleted expired app | {}".format(self.description))
@@ -341,6 +346,10 @@ class Deployment(models.Model):
             logger_instance.error(u"...NOT restored routes | {}".format(self.description))
             return
 
+        if not deployment_utils.ShipyardWrapper().container_exists(response=response):
+            logger_instance.error(u"...app container does NOT exist! | {}".format(self.description))
+            return
+
         routing_data, app_urls = deployment_utils.get_app_container_routing_data(
             deployment_instance=self,
             shipyard_response=[response.json()],
@@ -352,6 +361,11 @@ class Deployment(models.Model):
 
     def restore(self, logger_instance):
         logger_instance.info(u"Restoring expired app | {}".format(self.description))
+
+        if not deployment_utils.ShipyardWrapper().container_exists(response=None,
+                                                                   container_id=self.remote_container_id):
+            logger_instance.error(u"...app container does NOT exist! | {}".format(self.description))
+            return
 
         response = deployment_utils.ShipyardWrapper().restart(container_id=self.remote_container_id)
         if response.status_code != 204:

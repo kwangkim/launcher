@@ -113,3 +113,8 @@ class ShipyardWrapper(object):
 
     def inspect(self, container_id):
         return self._get_request('', container_id=container_id)
+
+    def container_exists(self, response=None, container_id=None):
+        if not response:
+            response = self.inspect(container_id=container_id)
+        return response.json() is not None
