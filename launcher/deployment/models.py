@@ -341,12 +341,13 @@ class Deployment(models.Model):
     def restore_routes(self, logger_instance):
         logger_instance.info(u"Restoring routes | {}".format(self.description))
 
-        response = deployment_utils.ShipyardWrapper().inspect(container_id=self.remote_container_id)
+        shipyard_wrapper = deployment_utils.ShipyardWrapper()
+        response = shipyard_wrapper.inspect(container_id=self.remote_container_id)
         if response.status_code != 200:
             logger_instance.error(u"...NOT restored routes | {}".format(self.description))
             return
 
-        if not deployment_utils.ShipyardWrapper().container_exists(response=response):
+        if not shipyard_wrapper.container_exists(response=response):
             logger_instance.error(u"...app container does NOT exist! | {}".format(self.description))
             return
 
