@@ -18,4 +18,4 @@ class Command(BaseCommand):
 
         expired_apps = Deployment.objects.filter(status='Expired')
         for app in expired_apps:
-            app.expire(logger_instance=self)
+            app.set_status_page_routes(logger_instance=self)

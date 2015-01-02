@@ -311,6 +311,14 @@ class Deployment(models.Model):
             })
         self.save()
 
+    def set_status_page_routes(self, logger_instance):
+        routing_data = deployment_utils.get_status_page_routing_data(
+            deployment_instance=self, deployment_domain=settings.DEMO_APPS_CUSTOM_DOMAIN)
+        deployment_utils.HipacheRedisRouter().add_routes(routing_data=routing_data)
+
+        logger_instance.info(u"...updated Hipache/Redis routes | {}\n......{}".format(
+            self.description, str(routing_data)))
+
     def expire(self, logger_instance):
         logger_instance.info(u"Deleting expired app | {}".format(self.description))
 
@@ -323,12 +331,7 @@ class Deployment(models.Model):
         self.save()
         logger_instance.info(u"...deleted expired app | {}".format(self.description))
 
-        routing_data = deployment_utils.get_status_page_routing_data(
-            deployment_instance=self, deployment_domain=settings.DEMO_APPS_CUSTOM_DOMAIN)
-        deployment_utils.HipacheRedisRouter().add_routes(routing_data=routing_data)
-
-        logger_instance.info(u"...updated Hipache/Redis routes | {}\n......{}".format(
-            self.description, str(routing_data)))
+        self.set_status_page_routes(logger_instance=logger_instance)
 
     def restore_routes(self, logger_instance):
         logger_instance.info(u"Restoring routes | {}".format(self.description))
