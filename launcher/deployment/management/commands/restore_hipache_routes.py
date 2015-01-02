@@ -15,7 +15,9 @@ class Command(BaseCommand):
         active_apps = Deployment.objects.filter(status='Completed')
         for app in active_apps:
             app.restore_routes(logger_instance=self)
+            self.info(u"---------------------------------------------------------------")
 
         expired_apps = Deployment.objects.filter(status='Expired')
         for app in expired_apps:
             app.set_status_page_routes(logger_instance=self)
+            self.info(u"---------------------------------------------------------------")

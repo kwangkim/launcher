@@ -359,7 +359,7 @@ class Deployment(models.Model):
         logger_instance.info(u"...restored Hipache/Redis routes | {}\n......{}".format(
             self.description, str(routing_data)))
 
-    def restore(self, logger_instance):
+    def restore(self, new_expiration_time, logger_instance):
         logger_instance.info(u"Restoring expired app | {}".format(self.description))
 
         if not deployment_utils.ShipyardWrapper().container_exists(response=None,
@@ -375,6 +375,7 @@ class Deployment(models.Model):
         self.restore_routes(logger_instance=logger_instance)
 
         self.status = 'Completed'  # TODO: we probably need a small FSM and a log of transitions
+        self.expiration_time = new_expiration_time
         self.save()
         logger_instance.info(u"...restored expired app | {}".format(self.description))
 

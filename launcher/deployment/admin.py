@@ -1,5 +1,7 @@
+import datetime
 from django.contrib import admin, messages
 from django.http import HttpResponse
+from django.utils import timezone
 from .models import Deployment, DeploymentErrorLog, Project
 
 
@@ -23,8 +25,15 @@ def restore_app(modeladmin, request, queryset):
     logger = TextLogger()
     apps_to_restore = queryset.filter(status='Expired')
     logger.info('Number of apps to restore: {}'.format(len(apps_to_restore)))
+    new_expiration_time = timezone.now() + datetime.timedelta(minutes=60)
     for app in apps_to_restore:
-        app.restore(logger_instance=logger)
+        logger.info(u"---------------------------------------------------------------")
+        app.restore(logger_instance=logger, new_expiration_time=new_expiration_time)
+    logger.info(u"\n\n")
+    logger.info(u"##############################################################")
+    logger.info(u"### Expiration times have been set to: NOW + 60 minutes.")
+    logger.info(u"### REMEMBER TO ADJUST THEM MANUALLY")
+    logger.info(u"##############################################################")
     # TODO: Make this nicer!
     return HttpResponse('<html><body><textarea style="width: 100%" rows={}>{}</textarea>'
                         '<br><a href="{}">Go back</a></body></html>'.format(
