@@ -34,10 +34,10 @@
   command: redis-cli -p 63790 del frontend:{{shipyard_url}}
 
 - name: Insert Launcher DNS entry in hipache
-  command: redis-cli -p 63790 rpush frontend:{{app_url}} launcher http://{{django_env_vars.LAUNCHER_IP}}:8000
+  command: redis-cli -p 63790 rpush frontend:{{app_url}} launcher http://{{launcher_ip}}:8000
 
 - name: Insert Shipyard DNS entry in hipache
-  command: redis-cli -p 63790 rpush frontend:{{shipyard_url}} launcher http://{{django_env_vars.LAUNCHER_IP}}:8080
+  command: redis-cli -p 63790 rpush frontend:{{shipyard_url}} launcher http://{{launcher_ip}}:8080
 
 - name: Restore app routes
   django_manage: >
