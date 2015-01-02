@@ -362,12 +362,12 @@ class Deployment(models.Model):
     def restore(self, new_expiration_time, logger_instance):
         logger_instance.info(u"Restoring expired app | {}".format(self.description))
 
-        if not deployment_utils.ShipyardWrapper().container_exists(response=None,
-                                                                   container_id=self.remote_container_id):
+        shipyard_wrapper = deployment_utils.ShipyardWrapper()
+        if not shipyard_wrapper.container_exists(response=None, container_id=self.remote_container_id):
             logger_instance.error(u"...app container does NOT exist! | {}".format(self.description))
             return
 
-        response = deployment_utils.ShipyardWrapper().restart(container_id=self.remote_container_id)
+        response = shipyard_wrapper.restart(container_id=self.remote_container_id)
         if response.status_code != 204:
             logger_instance.error(u"...NOT restored expired app | {}".format(self.description))
             return
