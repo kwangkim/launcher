@@ -330,14 +330,7 @@ class Deployment(models.Model):
         logger_instance.info(u"...updated Hipache/Redis routes | {}\n......{}".format(
             self.description, str(routing_data)))
 
-    def restore(self, logger_instance):
-        logger_instance.info(u"Restoring expired app | {}".format(self.description))
-
-        response = deployment_utils.ShipyardWrapper().restart(container_id=self.remote_container_id)
-        if response.status_code != 204:
-            logger_instance.error(u"...NOT restored expired app | {}".format(self.description))
-            return
-
+    def restore_routes(self, logger_instance):
         logger_instance.info(u"Restoring routes | {}".format(self.description))
 
         response = deployment_utils.ShipyardWrapper().inspect(container_id=self.remote_container_id)
@@ -353,6 +346,16 @@ class Deployment(models.Model):
 
         logger_instance.info(u"...restored Hipache/Redis routes | {}\n......{}".format(
             self.description, str(routing_data)))
+
+    def restore(self, logger_instance):
+        logger_instance.info(u"Restoring expired app | {}".format(self.description))
+
+        response = deployment_utils.ShipyardWrapper().restart(container_id=self.remote_container_id)
+        if response.status_code != 204:
+            logger_instance.error(u"...NOT restored expired app | {}".format(self.description))
+            return
+
+        self.restore_routes(logger_instance=logger_instance)
 
         self.status = 'Completed'  # TODO: we probably need a small FSM and a log of transitions
         self.save()

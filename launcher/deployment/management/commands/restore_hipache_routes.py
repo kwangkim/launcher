@@ -14,7 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         active_apps = Deployment.objects.filter(status='Completed')
         for app in active_apps:
-            app.restore(logger_instance=self)
+            app.restore_routes(logger_instance=self)
 
         expired_apps = Deployment.objects.filter(status='Expired')
         for app in expired_apps:
