@@ -338,10 +338,6 @@ class Deployment(models.Model):
             logger_instance.error(u"...NOT restored expired app | {}".format(self.description))
             return
 
-        self.status = 'Completed'  # TODO: we probably need a small FSM and a log of transitions
-        self.save()
-        logger_instance.info(u"...restored expired app | {}".format(self.description))
-
         logger_instance.info(u"Restoring routes | {}".format(self.description))
 
         response = deployment_utils.ShipyardWrapper().inspect(container_id=self.remote_container_id)
@@ -357,6 +353,10 @@ class Deployment(models.Model):
 
         logger_instance.info(u"...restored Hipache/Redis routes | {}\n......{}".format(
             self.description, str(routing_data)))
+
+        self.status = 'Completed'  # TODO: we probably need a small FSM and a log of transitions
+        self.save()
+        logger_instance.info(u"...restored expired app | {}".format(self.description))
 
     def send_reminder_email(self):
         if self.email:
