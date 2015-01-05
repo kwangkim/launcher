@@ -1,5 +1,14 @@
 # Changelog
 
+### 2.1
+
+* upgraded to Django 1.7
+* restoring expired applications from the admin
+* dynamic routing, show status page for expired apps
+* shipyard wrapper refactored
+* improved logging
+* removed New Relic server monitoring from vagrant provisioning
+
 ### 2.0.3
 
 * fix a bug that crashed loggers when dealing with unicode
@@ -43,7 +52,7 @@
 
 * enable secure mode for Intercom edX tracking
 
-### 1.5.0
+### 1.5
 
 * enable Intercom tracking for launched edX containers
 
@@ -67,7 +76,7 @@
 
 * add Intercom keys to Ansible secret_keys
 
-### 1.4.0
+### 1.4
 
 * replaced Segment.io with Intercom analytics
 

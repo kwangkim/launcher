@@ -2,7 +2,7 @@
 
 ## New instructions
 
-Install Vagrant and Virtualbox.
+Install Vagrant and Virtualbox (note that [vagrant-dns](https://github.com/BerlinVagrant/vagrant-dns) works only on OS X so if you use Linux you have to find an [alternative solution](http://serverfault.com/questions/118378/in-my-etc-hosts-file-on-linux-osx-how-do-i-do-a-wildcard-subdomain)): 
 
 	$ vagrant plugin install vagrant-dns
 	$ vagrant dns --install

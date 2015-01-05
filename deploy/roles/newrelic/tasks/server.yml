@@ -8,25 +8,14 @@
 
 - name: Install New Relic server library
   apt: name=newrelic-sysmond state=latest
-  when: environment != "vagrant"
 
 - name: Set New Relic license key
   command: nrsysmond-config --set license_key={{newrelic_license_key}}
   notify:
     - reload new relic monitoring
-  when: environment != "vagrant"
 
 - name: Start New Relic monitoring service
   service: name=newrelic-sysmond state=started enabled=yes
-  when: environment != "vagrant"
-
-#- name: Install plugin package
-#  pip: name=newrelic-plugin-agent state=latest
-#  when: environment != "vagrant"
-#
-#- name: Copy plugin configuration file
-#  template: src=newrelic_plugin_agent.cfg dest=/etc/newrelic/newrelic_plugin_agent.cfg
-#  when: environment != "vagrant"
 
 - name: Create log folder
   file: path=/var/log/newrelic state=directory

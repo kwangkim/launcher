@@ -1,5 +1,8 @@
 ---
 
+- name: Stop&remove the existing Hipache container, if there is one
+  docker: image=tutum/hipache name=hipache state=absent
+
 - name: Pull the Hipache image
   docker_pull: repo={{item.image_name}} tag={{item.tag}}
   with_items:
@@ -17,6 +20,8 @@
 
 - name: Start hipache
   docker: image=tutum/hipache links=hipache-redis:redis name=hipache ports=80:80 env="SERVER_WORKERS={{hipache_workers}}"
+  notify:
+    - restart nginx
 
 - name: Wait for hipache redis port
   wait_for: host=127.0.0.1 port={{hipache_redis_port}} delay=3
@@ -31,7 +36,16 @@
   command: redis-cli -p 63790 del frontend:{{shipyard_url}}
 
 - name: Insert Launcher DNS entry in hipache
-  command: redis-cli -p 63790 rpush frontend:{{app_url}} launcher http://{{ansible_default_ipv4['address']}}:8000
+  command: redis-cli -p 63790 rpush frontend:{{app_url}} launcher http://{{launcher_ip}}:8000
 
 - name: Insert Shipyard DNS entry in hipache
-  command: redis-cli -p 63790 rpush frontend:{{shipyard_url}} launcher http://{{ansible_default_ipv4['address']}}:8080
+  command: redis-cli -p 63790 rpush frontend:{{shipyard_url}} launcher http://{{launcher_ip}}:8080
+
+- name: Restore app routes
+  django_manage: >
+      command=restore_hipache_routes
+      app_path={{django_project_dir}}
+      settings=launcher.settings.production
+      pythonpath={{django_project_dir}}
+      virtualenv={{venv_dir}}
+  environment: django_env_vars

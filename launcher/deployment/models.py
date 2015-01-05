@@ -1,26 +1,24 @@
 import datetime
 import dateutil.relativedelta
-import json
 import logging
 import time
-from urlparse import urlparse
 
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.core import urlresolvers
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 import intercom
 import pusher
-import redis
-import requests
 from allauth.account.models import EmailAddress
 from customerio import CustomerIO
 from model_utils.fields import StatusField
 from model_utils import Choices
+from . import utils as deployment_utils
 from .tasks import deploy
 
 logger = logging.getLogger(__name__)
@@ -61,12 +59,56 @@ class Project(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.id:
+        if not self.id and not self.slug:
             self.slug = slugify(self.name)
+        self.full_clean()
         super(Project, self).save(*args, **kwargs)
 
+    @property
+    def port_list(self):
+        return [int(port) for port in self.ports.split(' ') if port]
+
+    @property
+    def hostname_list(self):
+        return [hostname for hostname in self.hostnames.split(' ') if hostname]
+
+    @property
+    def scheme(self):
+        # TODO: this might become `scheme_list` at some point
+        return "https" if 443 in self.port_list else "http"
+
+    @property
+    def env_vars_dict(self):
+        d = {}
+        for pair in self.env_vars.split(' '):
+            if not pair:
+                continue
+            key, equals, value = pair.partition('=')
+            if not key or not value or equals != '=':
+                raise ValueError
+            d[key] = value
+        return d
+
+    def clean(self):
+        try:
+            port_list = self.port_list
+        except ValueError:
+            raise ValidationError({'ports': ['Invalid port(s).']})
+        hostname_list = self.hostname_list
+        assert len(port_list) > 0
+        if len(port_list) == 1:
+            if hostname_list:
+                raise ValidationError({'hostnames': ['You cannot specify hostnames as there is only one forwarded port.']})
+        else:
+            if len(port_list) != len(hostname_list):
+                raise ValidationError({'hostnames': ['The number of hostnames has to match the number of ports.']})
+        try:
+            self.env_vars_dict
+        except ValueError:
+            raise ValidationError({'env_vars': ['This string has an incorrect format.']})
+
     def landing_page_url(self):
-        return reverse('landing_page', kwargs={'slug': self.slug})
+        return urlresolvers.reverse('landing_page', kwargs={'slug': self.slug})
 
     def get_trial_duration(self, account_activated=False):
         if account_activated:
@@ -113,6 +155,10 @@ class Deployment(models.Model):
     def __unicode__(self):
         return self.deploy_id
 
+    @property
+    def description(self):
+        return "{0.project.name}: {0.deploy_id} for {0.email}".format(self)
+
     def save(self, *args, **kwargs):
         """
         Save the object with the "deploying" status to the DB to get
@@ -129,6 +175,9 @@ class Deployment(models.Model):
                 )
             except:
                 pass
+
+    def get_status_page_url(self):
+        return urlresolvers.reverse('deployment_detail', kwargs={'deploy_id': self.deploy_id})
 
     def get_remaining_seconds(self):
         if self.expiration_time and self.expiration_time > timezone.now():
@@ -150,7 +199,9 @@ class Deployment(models.Model):
         expiration_datetime = self.launch_time + datetime.timedelta(minutes=trial_duration)
         return expiration_datetime
 
-    def deploy(self):
+    def deploy(self, logger_instance):
+        logger_instance.info(u"Deploying | {}".format(self.description))
+
         instance = self._get_pusher_instance()
         cio = CustomerIO(settings.CUSTOMERIO_SITE_ID, settings.CUSTOMERIO_API_KEY)
         cio.identify(id=self.email, email=self.email)
@@ -158,25 +209,19 @@ class Deployment(models.Model):
             'message': "Creating a new container...",
             'percent': 30
         })
-        headers = {
-            'content-type': 'application/json',
-            'X-Service-Key': settings.SHIPYARD_KEY
-        }
         # run the container
-        ports = self.project.ports.split(' ')
-        if self.project.env_vars:
-            env_vars = dict(item.split("=") for item in self.project.env_vars.split(" "))
-        else:
-            env_vars = {}
-        bind_ports = [{"proto": "tcp", "container_port": int(port)} for port in ports]
+        env_vars_dict = self.project.env_vars_dict
+        port_list = self.project.port_list
+        bind_ports = [{"proto": "tcp", "container_port": port} for port in port_list]
         if "edx" in self.project.name.lower():
-            env_vars["EDX_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["EDX_PREVIEW_LMS_BASE"] = "preview.lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["EDX_CMS_BASE"] = "cms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
-            env_vars["INTERCOM_APP_ID"] = "{0}".format(settings.INTERCOM_EDX_APP_ID)
-            env_vars["INTERCOM_APP_SECRET"] = "{0}".format(settings.INTERCOM_EDX_APP_SECRET)
-            env_vars["INTERCOM_USER_EMAIL"] = "{0}".format(self.email)
+            env_vars_dict["EDX_LMS_BASE"] = "lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars_dict["EDX_PREVIEW_LMS_BASE"] = "preview.lms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars_dict["EDX_CMS_BASE"] = "cms-{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN)
+            env_vars_dict["INTERCOM_APP_ID"] = settings.INTERCOM_EDX_APP_ID
+            env_vars_dict["INTERCOM_APP_SECRET"] = settings.INTERCOM_EDX_APP_SECRET
+            env_vars_dict["INTERCOM_USER_EMAIL"] = self.email
 
+        # Shipyard API docs: http://shipyard-project.com/docs/api/#post-containers
         payload = {
             "name": self.project.image_name,
             "cpus": float(self.project.number_of_cpus or settings.DEFAULT_NUMBER_OF_CPUS),
@@ -185,15 +230,14 @@ class Deployment(models.Model):
             "container_name": self.deploy_id,
             "hostname": self.deploy_id,
             "labels": ["dev"],
-            "environment": env_vars,
+            "environment": env_vars_dict,
             "bind_ports": bind_ports
         }
-        r = requests.post(
-            "{0}/api/containers".format(settings.SHIPYARD_HOST),
-            data=json.dumps(payload),
-            headers=headers
-        )
+        logger_instance.info(u"Creating Shipyard container... | {}".format(self.description))
+
+        r = deployment_utils.ShipyardWrapper().deploy(payload=payload)
         if r.status_code == 201:
+            logger_instance.info(u"...Shipyard container created | {}".format(self.description))
             response = r.json()
             self.remote_container_id = response[0]['id']
             # This sleep is needed to avoid problems with the API
@@ -203,27 +247,15 @@ class Deployment(models.Model):
                 'percent': 75
             })
             time.sleep(7)
-            domains = []
-            docker_server = urlparse(response[0]['engine']['addr'])
-            docker_server_ip = docker_server.hostname
-            for hostname in self.project.hostnames.split(" "):
-                if hostname:
-                    domains.append("{0}-{1}.{2}".format(hostname, self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
-                else:
-                    domains.append("{0}.{1}".format(self.deploy_id, settings.DEMO_APPS_CUSTOM_DOMAIN))
-            # maps internal container ports to domains
-            port_domain_mapping = {int(port): domain for port, domain in zip(ports, domains)}
-            # maps internal container ports to public ports (for example: 80 -> 49302)
-            public_container_port_mapping = {port["container_port"]: port["port"] for port in response[0]["ports"]}
-            scheme = "https" if "443" in self.project.ports else "http"
-            app_urls = []
-            r = redis.StrictRedis(host=settings.HIPACHE_REDIS_IP, port=settings.HIPACHE_REDIS_PORT, db=0)
-            for internal_port, public_port in public_container_port_mapping.items():
-                domain = port_domain_mapping[internal_port]
-                app_url = "{0}://{1}".format(scheme, domain)
-                app_urls.append(app_url)
-                r.rpush("frontend:{0}".format(domain), self.deploy_id)
-                r.rpush("frontend:{0}".format(domain), "{0}://{1}:{2}".format(scheme, docker_server_ip, public_port))
+
+            routing_data, app_urls = deployment_utils.get_app_container_routing_data(
+                deployment_instance=self,
+                shipyard_response=response,
+                deployment_domain=settings.DEMO_APPS_CUSTOM_DOMAIN)
+            deployment_utils.HipacheRedisRouter().add_routes(routing_data=routing_data)
+
+            logger_instance.info(u"...Hipache/Redis routes created | {}\n......{}".format(
+                self.description, str(routing_data)))
 
             self.url = " ".join(app_urls)
             self.status = 'Completed'
@@ -254,20 +286,22 @@ class Deployment(models.Model):
                           name='app_deploy_complete',
                           app_url=self.url.replace(" ", "\n"),
                           app_name=self.project.name,
-                          status_url="http://launcher.appsembler.com" + reverse(
+                          status_url="http://launcher.appsembler.com" + urlresolvers.reverse(
                               'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
                           trial_duration=self.project.get_human_readable_trial_duration(account_activated),
                           username=self.project.default_username,
                           password=self.project.default_password
                 )
         else:
+            logger_instance.error(u"...Deployment failed | {}".format(self.description))
+
             self.status = 'Failed'
             error_log = DeploymentErrorLog(deployment=self, http_status=r.status_code, error_log=r.text)
             error_log.save()
             send_mail(
                 "Deployment failed: {0}".format(self.deploy_id),
                 "Error log link: http://launcher.appsembler.com{0}".format(
-                    reverse('admin:deployment_deploymenterrorlog_change', args=(error_log.id,))),
+                    urlresolvers.reverse('admin:deployment_deploymenterrorlog_change', args=(error_log.id,))),
                 'info@appsembler.com',
                 ['filip@appsembler.com', 'nate@appsembler.com']
 
@@ -277,6 +311,75 @@ class Deployment(models.Model):
             })
         self.save()
 
+    def set_status_page_routes(self, logger_instance):
+        routing_data = deployment_utils.get_status_page_routing_data(
+            deployment_instance=self, deployment_domain=settings.DEMO_APPS_CUSTOM_DOMAIN)
+        deployment_utils.HipacheRedisRouter().add_routes(routing_data=routing_data)
+
+        logger_instance.info(u"...updated Hipache/Redis routes | {}\n......{}".format(
+            self.description, str(routing_data)))
+
+    def expire(self, logger_instance):
+        logger_instance.info(u"Deleting expired app | {}".format(self.description))
+
+        if not deployment_utils.ShipyardWrapper().container_exists(response=None,
+                                                                   container_id=self.remote_container_id):
+            logger_instance.error(u"...app container does NOT exist! | {}".format(self.description))
+            return
+
+        response = deployment_utils.ShipyardWrapper().stop(container_id=self.remote_container_id)
+        if response.status_code != 204:
+            logger_instance.error(u"...NOT deleted expired app | {}".format(self.description))
+            return
+
+        self.status = 'Expired'
+        self.save()
+        logger_instance.info(u"...deleted expired app | {}".format(self.description))
+
+        self.set_status_page_routes(logger_instance=logger_instance)
+
+    def restore_routes(self, logger_instance):
+        logger_instance.info(u"Restoring routes | {}".format(self.description))
+
+        shipyard_wrapper = deployment_utils.ShipyardWrapper()
+        response = shipyard_wrapper.inspect(container_id=self.remote_container_id)
+        if response.status_code != 200:
+            logger_instance.error(u"...NOT restored routes | {}".format(self.description))
+            return
+
+        if not shipyard_wrapper.container_exists(response=response):
+            logger_instance.error(u"...app container does NOT exist! | {}".format(self.description))
+            return
+
+        routing_data, app_urls = deployment_utils.get_app_container_routing_data(
+            deployment_instance=self,
+            shipyard_response=[response.json()],
+            deployment_domain=settings.DEMO_APPS_CUSTOM_DOMAIN)
+        deployment_utils.HipacheRedisRouter().add_routes(routing_data=routing_data)
+
+        logger_instance.info(u"...restored Hipache/Redis routes | {}\n......{}".format(
+            self.description, str(routing_data)))
+
+    def restore(self, new_expiration_time, logger_instance):
+        logger_instance.info(u"Restoring expired app | {}".format(self.description))
+
+        shipyard_wrapper = deployment_utils.ShipyardWrapper()
+        if not shipyard_wrapper.container_exists(response=None, container_id=self.remote_container_id):
+            logger_instance.error(u"...app container does NOT exist! | {}".format(self.description))
+            return
+
+        response = shipyard_wrapper.restart(container_id=self.remote_container_id)
+        if response.status_code != 204:
+            logger_instance.error(u"...NOT restored expired app | {}".format(self.description))
+            return
+
+        self.restore_routes(logger_instance=logger_instance)
+
+        self.status = 'Completed'  # TODO: we probably need a small FSM and a log of transitions
+        self.expiration_time = new_expiration_time
+        self.save()
+        logger_instance.info(u"...restored expired app | {}".format(self.description))
+
     def send_reminder_email(self):
         if self.email:
             cio = CustomerIO(settings.CUSTOMERIO_SITE_ID, settings.CUSTOMERIO_API_KEY)
@@ -285,7 +388,7 @@ class Deployment(models.Model):
                 name='app_expiring_soon',
                 app_name=self.project.name,
                 app_url=self.url,
-                status_url="http://launcher.appsembler.com" + reverse(
+                status_url="http://launcher.appsembler.com" + urlresolvers.reverse(
                     'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
                 remaining_minutes=self.get_remaining_minutes(),
                 expiration_time=timezone.localtime(self.expiration_time).isoformat()
