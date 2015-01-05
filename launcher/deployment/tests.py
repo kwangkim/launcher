@@ -1,7 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase, TestCase
 
-from .models import Project
+from .models import Project, Deployment
+from .utils import get_app_container_routing_data, get_status_page_routing_data
 
 
 class ProjectModelUnitTests(SimpleTestCase):
@@ -116,3 +117,69 @@ class ProjectModelTests(TestCase):
         self.assertEqual(project.slug, 'big-project')
 
 
+class UtilsTestCase(SimpleTestCase):
+    def test_app_single_endpoint_routing_data(self):
+        deployment = Deployment(deploy_id='testproject123456',
+                                project=Project(hostnames='', ports='80'))
+        routing_data, app_urls = get_app_container_routing_data(
+            deployment_instance=deployment,
+            shipyard_response=[{'engine': {'addr': 'http://123.234.135.246:2375'},
+                                'ports': [{'container_port': 80,
+                                           'port': 47930}]}],
+            deployment_domain='demo.test')
+        self.assertListEqual(routing_data, [['frontend:testproject123456.demo.test',
+                                             'testproject123456',
+                                             'http://123.234.135.246:47930']])
+        self.assertListEqual(app_urls, ['http://testproject123456.demo.test'])
+
+    def test_app_multi_endpoint_routing_data(self):
+        deployment = Deployment(deploy_id='testproject123456',
+                                project=Project(hostnames='endpoint1 endpoint2 endpoint3', ports='80 8080 16080'))
+        routing_data, app_urls = get_app_container_routing_data(
+            deployment_instance=deployment,
+            shipyard_response=[{'engine': {'addr': 'http://123.234.135.246:2375'},
+                                'ports': [{'container_port': 80,
+                                           'port': 47930},
+                                          {'container_port': 8080,
+                                           'port': 47931},
+                                          {'container_port': 16080,
+                                           'port': 47932}]}],
+            deployment_domain='demo.test')
+        self.assertListEqual(routing_data, [['frontend:endpoint1-testproject123456.demo.test',
+                                             'testproject123456',
+                                             'http://123.234.135.246:47930'],
+                                            ['frontend:endpoint2-testproject123456.demo.test',
+                                             'testproject123456',
+                                             'http://123.234.135.246:47931'],
+                                            ['frontend:endpoint3-testproject123456.demo.test',
+                                             'testproject123456',
+                                             'http://123.234.135.246:47932']])
+        self.assertListEqual(app_urls, ['http://endpoint1-testproject123456.demo.test',
+                                        'http://endpoint2-testproject123456.demo.test',
+                                        'http://endpoint3-testproject123456.demo.test'])
+
+    def test_status_page_single_endpoint_routing_data(self):
+        deployment = Deployment(deploy_id='testproject123456',
+                                project=Project(hostnames='', ports='80'))
+        with self.settings(LAUNCHER_IP='111.222.333.444'):
+            routing_data = get_status_page_routing_data(deployment_instance=deployment,
+                                                        deployment_domain='demo.test')
+        self.assertListEqual(routing_data, [['frontend:testproject123456.demo.test',
+                                             'testproject123456',
+                                             'http://111.222.333.444:8002']])
+
+    def test_status_page_multi_endpoint_routing_data(self):
+        deployment = Deployment(deploy_id='testproject123456',
+                                project=Project(hostnames='endpoint1 endpoint2 endpoint3', ports='80 8080 16080'))
+        with self.settings(LAUNCHER_IP='111.222.333.444'):
+            routing_data = get_status_page_routing_data(deployment_instance=deployment,
+                                                        deployment_domain='demo.test')
+        self.assertListEqual(routing_data, [['frontend:endpoint1-testproject123456.demo.test',
+                                             'testproject123456',
+                                             'http://111.222.333.444:8002'],
+                                            ['frontend:endpoint2-testproject123456.demo.test',
+                                             'testproject123456',
+                                             'http://111.222.333.444:8002'],
+                                            ['frontend:endpoint3-testproject123456.demo.test',
+                                             'testproject123456',
+                                             'http://111.222.333.444:8002']])
