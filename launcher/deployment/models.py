@@ -122,9 +122,13 @@ class Project(models.Model):
             return "{0} minutes".format(trial_duration)
         else:
             delta = dateutil.relativedelta.relativedelta(minutes=trial_duration)
-            text = "{0} hour".format(delta.hours)
+            if delta.days:
+                hours = 24 * delta.days
+            else:
+                hours = delta.hours
+            text = "{0} hour".format(hours)
             # add an 's' if there multiple hours
-            if delta.hours > 1:
+            if hours > 1:
                 text += "s"
             if delta.minutes > 0:
                 text += " and {0} minutes".format(delta.minutes)
