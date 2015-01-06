@@ -25,3 +25,6 @@ cloudfront_url: "d1s9voh9zis26j.cloudfront.net" # without the http(s) part and t
 django_media_dir: "{{git_repo_dir}}/launcher/media"
 django_project_dir: "{{git_repo_dir}}/launcher"
 django_static_dir: "{{git_repo_dir}}/launcher/collected_static"
+
+# s3 backup
+backups_dir: /opt/backups
