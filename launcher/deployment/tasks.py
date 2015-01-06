@@ -21,12 +21,10 @@ logger = get_task_logger(__name__)
 
 @app.task
 def deploy(deploy_instance):
-    deployment_info = "{0.project.name}: {0.deploy_id} for {0.email}".format(deploy_instance)
-    logger.info(u"Deploying | {}".format(deployment_info))
     try:
-        deploy_instance.deploy()
+        deploy_instance.deploy(logger_instance=logger)
     except:
-        logger.exception('Deployment failed: {}'.format(deployment_info))
+        logger.exception('Deployment failed | {}'.format(deploy_instance.description))
 
 
 @app.task
@@ -35,21 +33,9 @@ def destroy_expired_apps():
     from .models import Deployment
     expired = Deployment.objects.filter(expiration_time__lt=timezone.now(),
                                         status='Completed')
-    if expired:
-        for app in expired:
-            logger.info(u"Deleting expired app | {0.project.name}: {0.deploy_id} for {0.email}".format(app))
-            app.status = 'Expired'
-            app.save()
-            headers = {
-                'X-Service-Key': settings.SHIPYARD_KEY
-            }
-            r = requests.get(
-                "{0}/api/containers/{1}/stop".format(
-                    settings.SHIPYARD_HOST,
-                    app.remote_container_id,
-                ),
-                headers=headers
-            )
+    for app in expired:
+        app.expire(logger_instance=logger)
+
 
 @app.task
 def app_expiring_soon_reminder():

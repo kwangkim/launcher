@@ -1,7 +1,7 @@
 from allauth.account import views as allauth_views
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, RedirectView
 from .api import ProjectResource
 from .models import Deployment, Project
 
@@ -53,6 +53,16 @@ class ProjectDeployerView(DeployerMixin, DetailView):
 class ProjectDeployerEmbedView(ProjectDeployerView):
     def get_queryset(self):
         return Project.objects.filter(pk=self.kwargs['pk'])
+
+
+class AppRedirectView(RedirectView):
+    permanent = False
+
+    def get_redirect_url(self, *args, **kwargs):
+        app = self.request.GET.get('app', '')[:255]
+        deployment = get_object_or_404(Deployment, url__icontains=app)
+        # At the moment we support only the default status page
+        return deployment.get_status_page_url()
 
 
 class DeploymentDetailView(DetailView):

@@ -362,3 +362,6 @@ DEMO_APPS_CUSTOM_DOMAIN = get_env_variable('DEMO_APPS_CUSTOM_DOMAIN')
 DEFAULT_NUMBER_OF_CPUS = 0.1
 DEFAULT_AMOUNT_OF_RAM = 128
 
+# IP address used by Launcher
+LAUNCHER_IP = get_env_variable('LAUNCHER_IP')
+
