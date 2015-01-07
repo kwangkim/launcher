@@ -259,6 +259,18 @@ class Deployment(models.Model):
                 self.description, str(routing_data)))
 
             account_activated = EmailAddress.objects.filter(email=self.email, verified=True).exists()
+
+            if account_activated:
+                reminder = "As an existing user you have <strong>{}</strong> " \
+                           "before the trial expires.".format(
+                               self.project.get_human_readable_trial_duration(account_activated=True))
+            else:
+                reminder = "Please check your email and click on the link to confirm " \
+                           "your email address within <strong>{}</strong> - this will " \
+                           "extend your trial to <strong>{}</strong>.".format(
+                               self.project.get_human_readable_trial_duration(account_activated=False),
+                               self.project.get_human_readable_trial_duration(account_activated=True))
+
             self.url = " ".join(app_urls)
             self.status = 'Completed'
             self.launch_time = timezone.now()
@@ -268,7 +280,8 @@ class Deployment(models.Model):
                 'message': "Deployment complete!",
                 'app_url': self.url,
                 'username': self.project.default_username,
-                'password': self.project.default_password
+                'password': self.project.default_password,
+                'reminder': reminder,
             })
             try:
                 intercom.Event.create(

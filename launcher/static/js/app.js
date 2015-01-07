@@ -159,6 +159,10 @@ App.DeployStatusView = Backbone.View.extend({
                             '</div>';
             $(auth_data).insertAfter($info);
         }
+
+        var $reminder = $('<hr><div><small>' + data['reminder'] + '</small></div>');
+        $info.parent().append($reminder);
+
         Intercom('update');
 },
 
