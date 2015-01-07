@@ -183,3 +183,34 @@ class UtilsTestCase(SimpleTestCase):
                                             ['frontend:endpoint3-testproject123456.demo.test',
                                              'testproject123456',
                                              'http://111.222.333.444:8002']])
+
+    def test_human_readable_trial_duration(self):
+        project1 = Project(trial_duration=16, unconfirmed_trial_duration=3)
+        self.assertEqual(project1.get_human_readable_trial_duration(account_activated=False),
+                         '3 minutes')
+        self.assertEqual(project1.get_human_readable_trial_duration(account_activated=True),
+                         '16 minutes')
+
+        project2 = Project(trial_duration=65, unconfirmed_trial_duration=30)
+        self.assertEqual(project2.get_human_readable_trial_duration(account_activated=False),
+                         '30 minutes')
+        self.assertEqual(project2.get_human_readable_trial_duration(account_activated=True),
+                         '1 hour and 5 minutes')
+
+        project3 = Project(trial_duration=1440, unconfirmed_trial_duration=120)
+        self.assertEqual(project3.get_human_readable_trial_duration(account_activated=False),
+                         '2 hours')
+        self.assertEqual(project3.get_human_readable_trial_duration(account_activated=True),
+                         '24 hours')
+
+        project4 = Project(trial_duration=1470, unconfirmed_trial_duration=160)
+        self.assertEqual(project4.get_human_readable_trial_duration(account_activated=False),
+                         '2 hours and 40 minutes')
+        self.assertEqual(project4.get_human_readable_trial_duration(account_activated=True),
+                         '24 hours and 30 minutes')
+
+        project5 = Project(trial_duration=10001, unconfirmed_trial_duration=1445)
+        self.assertEqual(project5.get_human_readable_trial_duration(account_activated=False),
+                         '24 hours and 5 minutes')
+        self.assertEqual(project5.get_human_readable_trial_duration(account_activated=True),
+                         '166 hours and 41 minutes')
