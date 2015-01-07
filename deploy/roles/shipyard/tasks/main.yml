@@ -23,6 +23,9 @@
 - name: Install RethinkDB CLI
   npm: name=recli global=yes state=latest
 
+- name: Stop&remove the existing Shipyardcontainer, if there is one
+  docker: image=shipyard/shipyard name=shipyard state=absent
+
 - name: Start Shipyard
   docker: image=shipyard/shipyard name=shipyard links=shipyard-rethinkdb:rethinkdb ports=8080:8080 stdin_open=yes tty=yes
 
