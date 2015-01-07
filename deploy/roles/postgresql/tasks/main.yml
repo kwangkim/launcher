@@ -34,17 +34,17 @@
                  lc_ctype='en_US.UTF-8'
                  template='template0'
 
-#- name: Install S3 command line tools
-#  apt: name=s3cmd state=latest
-#
-#- name: Copy s3cmd config file
-#  template: src=s3cfg dest=/etc/s3cfg
-#
-#- name: Create backups directory
-#  file: path="{{backups_dir}}" state=directory owner=postgres mode=775
-#
-#- name: Copy cron backup script
-#  template: src=daily_backup.sh dest={{backups_dir}} mode=775
-#
-#- name: Enable the daily backup script
-#  cron: name="Daily DB backup" special_time=daily job="{{backups_dir}}/daily_backup.sh >/dev/null"
+- name: Install S3 command line tools
+  apt: name=s3cmd state=latest
+
+- name: Copy s3cmd config file
+  template: src=s3cfg dest=/etc/s3cfg
+
+- name: Create backups directory
+  file: path="{{backups_dir}}" state=directory owner=postgres mode=775
+
+- name: Copy cron backup script
+  template: src=daily_backup.sh dest={{backups_dir}} mode=775
+
+- name: Enable the daily backup script
+  cron: name="Daily DB backup" special_time=daily job="{{backups_dir}}/daily_backup.sh >/dev/null"
