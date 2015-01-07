@@ -258,6 +258,7 @@ class Deployment(models.Model):
             logger_instance.info(u"...Hipache/Redis routes created | {}\n......{}".format(
                 self.description, str(routing_data)))
 
+            account_activated = EmailAddress.objects.filter(email=self.email, verified=True).exists()
             self.url = " ".join(app_urls)
             self.status = 'Completed'
             self.launch_time = timezone.now()
@@ -281,18 +282,15 @@ class Deployment(models.Model):
                 )
             except:
                 pass
-            if self.email:
-                account_activated = EmailAddress.objects.filter(email=self.email, verified=True).exists()
-                cio.track(customer_id=self.email,
-                          name='app_deploy_complete',
-                          app_url=self.url.replace(" ", "\n"),
-                          app_name=self.project.name,
-                          status_url="http://launcher.appsembler.com" + urlresolvers.reverse(
-                              'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
-                          trial_duration=self.project.get_human_readable_trial_duration(account_activated),
-                          username=self.project.default_username,
-                          password=self.project.default_password
-                )
+            cio.track(customer_id=self.email,
+                      name='app_deploy_complete',
+                      app_url=self.url.replace(" ", "\n"),
+                      app_name=self.project.name,
+                      status_url="http://launcher.appsembler.com" + urlresolvers.reverse(
+                          'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
+                      trial_duration=self.project.get_human_readable_trial_duration(account_activated),
+                      username=self.project.default_username,
+                      password=self.project.default_password)
         else:
             logger_instance.error(u"...Deployment failed | {}".format(self.description))
 
@@ -382,18 +380,15 @@ class Deployment(models.Model):
         logger_instance.info(u"...restored expired app | {}".format(self.description))
 
     def send_reminder_email(self):
-        if self.email:
-            cio = CustomerIO(settings.CUSTOMERIO_SITE_ID, settings.CUSTOMERIO_API_KEY)
-            cio.track(
-                customer_id=self.email,
-                name='app_expiring_soon',
-                app_name=self.project.name,
-                app_url=self.url,
-                status_url="http://launcher.appsembler.com" + urlresolvers.reverse(
-                    'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
-                remaining_minutes=self.get_remaining_minutes(),
-                expiration_time=timezone.localtime(self.expiration_time).isoformat()
-            )
+        cio = CustomerIO(settings.CUSTOMERIO_SITE_ID, settings.CUSTOMERIO_API_KEY)
+        cio.track(customer_id=self.email,
+                  name='app_expiring_soon',
+                  app_name=self.project.name,
+                  app_url=self.url,
+                  status_url="http://launcher.appsembler.com" + urlresolvers.reverse(
+                      'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
+                  remaining_minutes=self.get_remaining_minutes(),
+                  expiration_time=timezone.localtime(self.expiration_time).isoformat())
 
     def _get_pusher_instance(self):
         push = pusher.Pusher(
