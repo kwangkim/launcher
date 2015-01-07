@@ -1,5 +1,11 @@
 # Changelog
 
+### 2.1.2
+### 2.1.1
+
+* fixed human readable project trial duration
+* added DB backups to provisioning with automatic upload to S3
+
 ### 2.1
 
 * upgraded to Django 1.7
