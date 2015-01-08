@@ -260,16 +260,19 @@ class Deployment(models.Model):
 
             account_activated = EmailAddress.objects.filter(email=self.email, verified=True).exists()
 
+            human_readable_confirmed_trial_duration = \
+                self.project.get_human_readable_trial_duration(account_activated=True)
+            human_readable_unconfirmed_trial_duration = \
+                self.project.get_human_readable_trial_duration(account_activated=False)
+
             if account_activated:
                 reminder = "As an existing user you have <strong>{}</strong> " \
-                           "before the trial expires.".format(
-                               self.project.get_human_readable_trial_duration(account_activated=True))
+                           "before the trial expires.".format(human_readable_confirmed_trial_duration)
             else:
                 reminder = "Please check your email and click on the link to confirm " \
                            "your email address within <strong>{}</strong> - this will " \
-                           "extend your trial to <strong>{}</strong>.".format(
-                               self.project.get_human_readable_trial_duration(account_activated=False),
-                               self.project.get_human_readable_trial_duration(account_activated=True))
+                           "extend your trial to <strong>{}</strong>.".format(human_readable_unconfirmed_trial_duration,
+                                                                              human_readable_confirmed_trial_duration)
 
             self.url = " ".join(app_urls)
             self.status = 'Completed'
@@ -301,7 +304,9 @@ class Deployment(models.Model):
                       app_name=self.project.name,
                       status_url="http://launcher.appsembler.com" + urlresolvers.reverse(
                           'deployment_detail', kwargs={'deploy_id': self.deploy_id}),
-                      trial_duration=self.project.get_human_readable_trial_duration(account_activated),
+                      account_activated=account_activated,
+                      confirmed_trial_duration=human_readable_confirmed_trial_duration,
+                      unconfirmed_trial_duration=human_readable_unconfirmed_trial_duration,
                       username=self.project.default_username,
                       password=self.project.default_password)
         else:
