@@ -118,3 +118,11 @@ class ShipyardWrapper(object):
         if not response:
             response = self.inspect(container_id=container_id)
         return response.json() is not None
+
+
+def get_customerio_event_name(name, deployment_environment=settings.DEPLOYMENT_ENVIRONMENT,
+                              mapping=settings.DEPLOYMENT_ENVIRONMENT_TO_CUSTOMERIO_SUFFIX_MAPPING):
+    suffix = mapping[deployment_environment]
+    if not suffix:
+        return name
+    return '{}__{}'.format(name, suffix)

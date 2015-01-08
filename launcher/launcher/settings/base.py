@@ -334,6 +334,15 @@ CELERY_IGNORE_RESULT = True
 CELERY_DEFAULT_QUEUE = 'celery'
 CELERY_CREATE_MISSING_QUEUES = True
 
+# Misc settings
+DEPLOYMENT_ENVIRONMENT = get_env_variable('DEPLOYMENT_ENVIRONMENT')
+
+DEPLOYMENT_ENVIRONMENT_TO_CUSTOMERIO_SUFFIX_MAPPING = {
+    'vagrant': 'development',
+    'staging': 'development',
+    'production': '',
+}
+
 # Pusher settings
 PUSHER_APP_ID = get_env_variable('PUSHER_APP_ID')
 PUSHER_APP_KEY = get_env_variable('PUSHER_APP_KEY')

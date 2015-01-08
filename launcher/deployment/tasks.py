@@ -50,6 +50,6 @@ def app_expiring_soon_reminder():
 
     for app in expiring_soon:
         logger.info(u"Expiration notification | {0.project.name}: {0.deploy_id} for {0.email}".format(app))
-        app.send_reminder_email()
+        app.send_reminder_email(logger_instance=logger)
         app.reminder_mail_sent = True
         app.save()

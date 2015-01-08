@@ -298,8 +298,10 @@ class Deployment(models.Model):
                 )
             except:
                 pass
+            cio_event_name = deployment_utils.get_customerio_event_name('app_deploy_complete')
+            logger_instance.info(u"...Triggering customer.io event: {}".format(cio_event_name))
             cio.track(customer_id=self.email,
-                      name='app_deploy_complete',
+                      name=cio_event_name,
                       app_url=self.url.replace(" ", "\n"),
                       app_name=self.project.name,
                       status_url="http://launcher.appsembler.com" + urlresolvers.reverse(
@@ -397,10 +399,12 @@ class Deployment(models.Model):
         self.save()
         logger_instance.info(u"...restored expired app | {}".format(self.description))
 
-    def send_reminder_email(self):
+    def send_reminder_email(self, logger_instance):
         cio = CustomerIO(settings.CUSTOMERIO_SITE_ID, settings.CUSTOMERIO_API_KEY)
+        cio_event_name = deployment_utils.get_customerio_event_name('app_expiring_soon')
+        logger_instance.info(u"...Triggering customer.io event: {}".format(cio_event_name))
         cio.track(customer_id=self.email,
-                  name='app_expiring_soon',
+                  name=cio_event_name,
                   app_name=self.project.name,
                   app_url=self.url,
                   status_url="http://launcher.appsembler.com" + urlresolvers.reverse(

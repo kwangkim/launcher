@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase, TestCase
 
 from .models import Project, Deployment
-from .utils import get_app_container_routing_data, get_status_page_routing_data
+from .utils import get_app_container_routing_data, get_status_page_routing_data, get_customerio_event_name
 
 
 class ProjectModelUnitTests(SimpleTestCase):
@@ -214,3 +214,18 @@ class UtilsTestCase(SimpleTestCase):
                          '24 hours and 5 minutes')
         self.assertEqual(project5.get_human_readable_trial_duration(account_activated=True),
                          '166 hours and 41 minutes')
+
+    def test_customerio_event_name(self):
+        event_name1 = get_customerio_event_name(name='app_deployed',
+                                                deployment_environment='test',
+                                                mapping={'dev': 'devenv',
+                                                         'test': 'testenv',
+                                                         'prod': ''})
+        self.assertEqual(event_name1, 'app_deployed__testenv')
+
+        event_name2 = get_customerio_event_name(name='app_expired',
+                                                deployment_environment='prod',
+                                                mapping={'dev': 'devenv',
+                                                         'test': 'testenv',
+                                                         'prod': ''})
+        self.assertEqual(event_name2, 'app_expired')
